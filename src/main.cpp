@@ -2,6 +2,7 @@
 #include<unistd.h>
 #include<iostream>
 #include<fstream>
+#include<algorithm>
 #include"ast.hpp"
 #include"sym.hpp"
 #include"parser.tab.hpp"
@@ -154,6 +155,42 @@ void dfsAst(BaseAst* ptr, int level){
     return;
 }
 
+void getRuntimeFun(){
+    SymItem* ptr = new SymItem("getint", "f_getint", 1, 1);
+    fun_sym_table.insert(make_pair("getint", ptr));
+    
+    ptr = new SymItem("getch", "f_getch", 1, 1);
+    fun_sym_table.insert(make_pair("getch", ptr));
+
+    ptr = new SymItem("putint", "f_putint", 0, 1);
+    fun_sym_table.insert(make_pair("putint", ptr));
+
+    ptr = new SymItem("putch", "f_putch", 0, 1);
+    fun_sym_table.insert(make_pair("putch", ptr));
+}
+
+void reorderCode(){
+    stack<int> st_mark;
+    st_mark.push(0);
+    int list_size = code_list.size();
+
+    for(int i = 0; i < list_size; ++i){
+        auto it = code_list.begin() + i;
+        if (it->size() > 2 && it->compare(0,2,"f_") == 0){
+            st_mark.push(i+1);
+            
+        }
+        else if (it->size() > 3 && it->compare(0,3,"end") == 0){
+            st_mark.pop();
+        }
+
+        else if (it->size() > 3 && it->compare(0,3,"var") == 0){
+            rotate(code_list.begin() + st_mark.top(), it, it + 1);
+        }
+
+    }
+}
+
 int main(int argc, char **argv){
 
     if (argc < 2) {
@@ -186,11 +223,13 @@ int main(int argc, char **argv){
     ofstream new_cout(output_path);
     cout.rdbuf(new_cout.rdbuf());
 
+    getRuntimeFun();
     BaseAst* root;
     yyparse(&root);
-    dfsAst(root, 0);
+    // dfsAst(root, 0);
     var_sym_stack.push(new SymTable());
-    root->genCode(0);
+    root->genCode();
+    reorderCode();
     for(string line: code_list){
         cout<<line<<endl;
     }
