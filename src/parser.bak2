@@ -1,0 +1,29 @@
+%{
+    #include<iostream>
+    #include"ast.cpp"
+    extern int yylex();
+    void yyerror(BaseAst**, const char *){};
+%}
+
+%union{
+    Token* kToken;
+    BaseAst* kPtrAst;
+};
+%parse-param {BaseAst* *root}
+
+%token <kToken> INT VOID CONST // 类型关键字
+%token <kToken> IF ELSE WHILE BREAK CONTINUE RETURN // 控制流关键字
+%token <kToken> ADD SUB MUL DIV MOD NOT// 运算符关键字(+, -, *, /, %, !)
+%token <kToken> LT GT LE GE EQ NE // 关系运算符(<, >, <=, >=, ==, !=)
+%token <kToken> LAND LOR // 逻辑运算符(&&, || )
+%token <kToken> IDENT ASSIGN // 标识符 赋值运算
+%token <kToken> VAL_CONST // 常量值
+%token <kToken> SEMI COMMA LKHX RKHX LKHZ RKHZ LKHD RKHD  // 标点符号(; , ( ) [ ] { })
+
+%type <kPtrAst> CompUnit 
+%%
+CompUnit        : IDENT
+                ;
+
+%%
+

@@ -1,0 +1,3 @@
+/mnt/e/PKU/大四上/编译原理/实习/sysy-cmake-template/build/CMakeFiles/rebuild_cache.dir
+/mnt/e/PKU/大四上/编译原理/实习/sysy-cmake-template/build/CMakeFiles/edit_cache.dir
+/mnt/e/PKU/大四上/编译原理/实习/sysy-cmake-template/build/CMakeFiles/compiler.dir

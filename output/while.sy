@@ -1,0 +1,26 @@
+f_main[0]
+	var T0
+	var t2
+	var t1
+	var t0
+	T0 = 3
+	l0:
+	t0 = T0 > 0
+	if t0 == 1	goto l1
+	goto l2
+	l1:
+		t1 = T0 - 1
+		T0 = t1
+		t2 = T0 < 1
+		if t2 == 1	goto l3
+		goto l4
+		l3:
+			goto l2
+		goto l5
+		l4:
+		goto l5
+		l5:
+	goto l0
+	l2:
+	return 0
+end f_main
