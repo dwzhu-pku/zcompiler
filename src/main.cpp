@@ -187,6 +187,12 @@ void getRuntimeFun(){
 
     ptr = new SymItem("putch", "f_putch", 0, 1);
     fun_sym_table.insert(make_pair("putch", ptr));
+
+    ptr = new SymItem("getarray", "f_getarray", 1, 1);
+    fun_sym_table.insert(make_pair("getarray", ptr));
+
+    ptr = new SymItem("putarray", "f_putarray", 0, 1);
+    fun_sym_table.insert(make_pair("putarray", ptr));
 }
 
 void reorderCode(){

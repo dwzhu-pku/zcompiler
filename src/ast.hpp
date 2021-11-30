@@ -130,6 +130,11 @@ class LvalAst: public BaseAst{
                     addr = var_tmp;
                 }
             }
+            if(!(branch1 == "" && branch2 == "" && next == "")){
+                string code_line =  "if " + addr + " >= 1 goto " + branch1;
+                code_list.push_back(code_line);
+                code_list.push_back("goto " + branch2);
+            }
         }
 
 };
@@ -356,12 +361,11 @@ class IfAst: public BaseAst{
             branch2 = "l" + to_string(tmp+2);
             next = "l" + to_string(tmp+3);
 
+            if_cond->branch1 = branch1;
+            if_cond->branch2 = branch2;
+            if_cond->next = next;
             if_cond->genCode();
 
-            string code_line =  "if " + if_cond->addr + " == 1\tgoto " + branch1;
-            code_list.push_back(code_line);
-
-            code_list.push_back( "goto " + branch2);
             code_list.push_back( branch1 + ":");
             if(if_then_stmt != nullptr){
                 if_then_stmt->genCode();
@@ -401,12 +405,15 @@ class WhileAst: public BaseAst{
 
             code_list.push_back( branch1 + ":");
 
+            while_cond->branch1 = branch2;
+            while_cond->branch2 = next;
+            while_cond->next = next;
             while_cond->genCode();
 
-            string code_line =  "if " + while_cond->addr + " == 1\tgoto " + branch2;
-            code_list.push_back(code_line);
+            // string code_line =  "if " + while_cond->addr + " == 1\tgoto " + branch2;
+            // code_list.push_back(code_line);
 
-            code_list.push_back( "goto " + next);
+            // code_list.push_back( "goto " + next);
             code_list.push_back( branch2 + ":");
 
             while_stmt->genCode();
@@ -483,27 +490,58 @@ class BinaryOpAst: public BaseAst{
             op = op_;
             val = val_;
             is_const = is_const_;
+            branch1 = "";
+            branch2 = "";
+            next = "";
         }
 
         void genCode(){
             if (Debug_Ir) printf("Generating code for BinaryAst\n");
             if(lt_exp == nullptr && rt_exp == nullptr){
                 addr = to_string(val);
+                
             }else if(lt_exp == nullptr && rt_exp != nullptr){
                 rt_exp->genCode();
                 addr = rt_exp->addr;
             }else if(lt_exp != nullptr && rt_exp == nullptr){
                 lt_exp->genCode();
                 addr = lt_exp->addr;
+            }else if(op == "||"){
+                lt_exp->branch1 = branch1;
+                rt_exp->branch1 = branch1;
+                rt_exp->branch2 = branch2;
+                int tmp = label_list.back();
+                label_list.push_back(tmp+1);
+                lt_exp->branch2 = "l" + to_string(tmp+1);
+                lt_exp->genCode();
+                code_list.push_back( lt_exp->branch2 + ":");
+                rt_exp->genCode();
+            }else if(op == "&&"){
+                int tmp = label_list.back();
+                label_list.push_back(tmp+1);
+                lt_exp->branch1 = "l" + to_string(tmp+1);
+                lt_exp->branch2 = branch2;
+                rt_exp->branch1 = branch1;
+                rt_exp->branch2 = branch2;
+                lt_exp->genCode();
+                code_list.push_back( lt_exp->branch1 + ":");
+                rt_exp->genCode();
             }else{
                 lt_exp->genCode();
                 rt_exp->genCode();
-                int tmp = temp_list.back();
-                temp_list.push_back(tmp + 1);
-                addr = str_t + to_string(tmp + 1);
-                code_list.push_back( "var " + addr);
-                string code_line =  addr + " = " + lt_exp->addr + " " + op + " " + rt_exp->addr;
-                code_list.push_back(code_line);
+
+                if(branch1 == "" && branch2 == "" && next == ""){
+                    int tmp = temp_list.back();
+                    temp_list.push_back(tmp + 1);
+                    addr = str_t + to_string(tmp + 1);
+                    code_list.push_back( "var " + addr);
+                    string code_line =  addr + " = " + lt_exp->addr + " " + op + " " + rt_exp->addr;
+                    code_list.push_back(code_line);
+                }else{
+                    string code_line =  "if " + lt_exp->addr + " " + op + " " + rt_exp->addr + "goto " + branch1;
+                    code_list.push_back(code_line);
+                    code_list.push_back("goto " + branch2);
+                }
             }
         }
 
