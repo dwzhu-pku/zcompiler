@@ -138,6 +138,7 @@ return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN\n
             }
 
 "//".*$     {  if(Debug_Lex)    printf("Comments, Ignored!");}
+"/*"[^"*"]*(\*+[^"*/"][^"*"]*)*\*+"/"  { if(Debug_Lex)    printf("Comments, Ignored!");}
 
     /*其它情况直接返回*/
 .           {

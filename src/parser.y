@@ -27,6 +27,7 @@
 %type <kPtrAst> ConstDef ConstDefArr ConstExp AddExp MulExp UnaryExp Exp
 %type <kPtrAst> PrimaryExp LVal Block BlockItem BlockItems Stmt
 %type <kPtrAst> Cond LOrExp LAndExp EqExp RelExp FuncFParams FuncRParams FuncFParam
+%type <kPtrAst> ConstExpArr ConstInitValArr InitValArr
 
 %%
 CompUnit        : CompUnit Decl
@@ -94,20 +95,55 @@ VarDefArr       : VarDefArr COMMA VarDef
 
 VarDef          : IDENT
                     {
-                        DeclAst* ptr = new DeclAst(INT, $1->ident_name);
+                        DeclAst* ptr = new DeclAst(1, $1->ident_name);
                         $$=ptr;
                     }
                 | IDENT ASSIGN InitVal
                     {
                         if(Debug_Parser)    printf("Trace: VarDef\n");
-                        DeclAst* ptr = new DeclAst(INT, $1->ident_name, $3);
+                        DeclAst* ptr = new DeclAst(1, $1->ident_name, $3);
                         $$=ptr;
+                    }
+                | IDENT ConstExpArr
+                    {
+                        if(Debug_Parser)    printf("Trace: VarDef\n");
+                        ListAst* ptr = new ListAst(($1)->ident_name, dynamic_cast<ArrayAst*>($2)->array_list);
+                        $$ = ptr;
+                    }
+                | IDENT ConstExpArr ASSIGN InitVal
+                    {
+                        if(Debug_Parser)    printf("Trace: VarDef\n");
+                        ListAst* ptr = new ListAst(($1)->ident_name, dynamic_cast<ArrayAst*>($2)->array_list, 
+                                                    dynamic_cast<ArrayAst*>($4)->array_list);
+                        $$ = ptr;
                     }
                 ;
 
 InitVal         : Exp
                     {
                         $$=$1;
+                    }
+                | LKHD RKHD
+                    {
+                        ArrayAst* ptr = new ArrayAst();
+                        $$=ptr;
+                    }
+                | LKHD InitValArr RKHD
+                    {
+                        ArrayAst* ptr = new ArrayAst(dynamic_cast<ArrayAst*>($2)->array_list);
+                        $$=ptr;
+                    }
+                ;
+InitValArr      : InitValArr COMMA InitVal
+                    {
+                        dynamic_cast<ArrayAst*>($1)->append_item($3);
+                        $$=$1;
+                    }
+                | InitVal
+                    {
+                        ArrayAst* ptr = new ArrayAst();
+                        ptr->append_item($1);
+                        $$=ptr;
                     }
                 ;
 ConstDefArr     : ConstDefArr COMMA ConstDef
@@ -124,13 +160,56 @@ ConstDefArr     : ConstDefArr COMMA ConstDef
                 ;
 ConstDef        : IDENT ASSIGN ConstInitVal
                     {
-                        DeclAst* ptr = new DeclAst(INT, $1->ident_name, $3);
+                        DeclAst* ptr = new DeclAst(1, $1->ident_name, $3);
+                        $$=ptr;
+                    }
+                | IDENT ConstExpArr ASSIGN ConstInitVal
+                    {
+                        if(Debug_Parser)    printf("Trace: ConstDef\n");
+                        ListAst* ptr = new ListAst(($1)->ident_name, dynamic_cast<ArrayAst*>($2)->array_list, 
+                                                    dynamic_cast<ArrayAst*>($4)->array_list);
+                        $$ = ptr;
+                    }
+                ;
+ConstExpArr     : ConstExpArr LKHZ ConstExp RKHZ
+                    {
+                        if(Debug_Parser)    printf("Trace: ConstExpArr\n");
+                        dynamic_cast<ArrayAst*>($1)->append_item($3);
+                        $$=$1;
+                    }
+                | LKHZ ConstExp RKHZ
+                    {
+                        if(Debug_Parser)    printf("Trace: ConstExpArr\n");
+                        ArrayAst* ptr = new ArrayAst();
+                        ptr->append_item($2);
                         $$=ptr;
                     }
                 ;
 ConstInitVal    : ConstExp
                     {
                         $$=$1;
+                    }
+                | LKHD RKHD
+                    {
+                        ArrayAst* ptr = new ArrayAst();
+                        $$=ptr;
+                    }
+                | LKHD ConstInitValArr RKHD
+                    {
+                        ArrayAst* ptr = new ArrayAst(dynamic_cast<ArrayAst*>($2)->array_list);
+                        $$=ptr;
+                    }
+                ;
+ConstInitValArr : ConstInitValArr COMMA ConstInitVal
+                    {
+                        dynamic_cast<ArrayAst*>($1)->append_item($3);
+                        $$=$1;
+                    }
+                | ConstInitVal
+                    {
+                        ArrayAst* ptr = new ArrayAst();
+                        ptr->append_item($1);
+                        $$=ptr;
                     }
                 ;
 ConstExp        : AddExp
@@ -212,6 +291,7 @@ PrimaryExp      : LKHX Exp RKHX
                     }
                 |  LVal
                     {
+                        dynamic_cast<LvalAst*>($1)->is_left_val = 0;
                         $$=$1;
                     }
                 | VAL_CONST
@@ -244,28 +324,34 @@ LVal            : IDENT
                         LvalAst* ptr = new LvalAst(($1)->ident_name);
                         $$ = ptr;
                     }
+                | IDENT ConstExpArr
+                    {
+                        if(Debug_Parser)    printf("Trace: LVal\n");
+                        LvalAst* ptr = new LvalAst(($1)->ident_name, dynamic_cast<ArrayAst*>($2)->array_list);
+                        $$ = ptr;
+                    }
                 ;
 
 FuncDef         : VOID IDENT LKHX RKHX Block
                     {
-                        FunDefAst* ptr = new FunDefAst(VOID, ($2)->ident_name, $5);
+                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, $5);
                         $$ = ptr;
                     }
                 | INT IDENT LKHX RKHX Block
                     {
-                        FunDefAst* ptr = new FunDefAst(INT, ($2)->ident_name, $5);
+                        FunDefAst* ptr = new FunDefAst(1, ($2)->ident_name, $5);
                         $$ = ptr;
                     }
                 | VOID IDENT LKHX FuncFParams RKHX Block
                     {
                         if(Debug_Parser)    printf("Trace: FuncDef\n");
-                        FunDefAst* ptr = new FunDefAst(VOID, ($2)->ident_name, $6, dynamic_cast<ArrayAst*>($4)->array_list);
+                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, $6, dynamic_cast<ArrayAst*>($4)->array_list);
                         $$ = ptr;
                     }
                 | INT IDENT LKHX FuncFParams RKHX Block
                     {
                         if(Debug_Parser)    printf("Trace: FuncDef\n");
-                        FunDefAst* ptr = new FunDefAst(INT, ($2)->ident_name, $6, dynamic_cast<ArrayAst*>($4)->array_list);
+                        FunDefAst* ptr = new FunDefAst(1, ($2)->ident_name, $6, dynamic_cast<ArrayAst*>($4)->array_list);
                         $$ = ptr;
                     }
                 ;
@@ -285,7 +371,24 @@ FuncFParams     : FuncFParams COMMA FuncFParam
 
 FuncFParam      : INT IDENT
                     {
-                        DeclAst* ptr = new DeclAst(INT, ($2)->ident_name);
+                        if(Debug_Parser)    printf("Trace: FuncFParam\n");
+                        DeclAst* ptr = new DeclAst(1, ($2)->ident_name);
+                        $$ = ptr;
+                    }
+                | INT IDENT LKHZ RKHZ 
+                    {
+                        if(Debug_Parser)    printf("Trace: FuncFParam\n");
+                        ArrayAst* tmp_ptr = new ArrayAst();
+                        tmp_ptr->append_item(new BinaryOpAst(nullptr, nullptr, "", 1, 1));
+                        ListAst* ptr = new ListAst(($2)->ident_name, tmp_ptr->array_list);
+                        $$ = ptr;
+                    }
+                | INT IDENT LKHZ RKHZ ConstExpArr
+                    {
+                        if(Debug_Parser)    printf("Trace: FuncFParam\n");
+                        ArrayAst* tmp_ptr = dynamic_cast<ArrayAst*>($5);
+                        tmp_ptr->array_list.insert(tmp_ptr->array_list.begin(), new BinaryOpAst(nullptr, nullptr, "", 1, 1));
+                        ListAst* ptr = new ListAst(($2)->ident_name, tmp_ptr->array_list);
                         $$ = ptr;
                     }
                 ;
@@ -310,28 +413,27 @@ BlockItems      : BlockItems BlockItem
                     }
                 | BlockItem
                     {
-                        $$=$1;
+                        BlockAst* ptr = new BlockAst;
+                        ptr->append_stmt($1);
+		                $$ = ptr;
                     }
                 ;
 
 BlockItem       : Decl
                     {
-                        BlockAst* ptr = new BlockAst;
-                        ptr->append_stmt($1);
-		                $$ = ptr;
+                        $$ = $1;
                     }
                 | Stmt
                     {
-                        BlockAst* ptr = new BlockAst;
-                        ptr->append_stmt($1);
-		                $$ = ptr;
+                        $$ = $1;
                     }
                 ;
 
 Stmt            : LVal ASSIGN Exp SEMI
                     {
                         if(Debug_Parser)    printf("Trace: Stmt\n");
-                        AssignAst* ptr = new AssignAst(dynamic_cast<LvalAst*>($1)->name, $3);
+                        dynamic_cast<LvalAst*>($1)->is_left_val = 1;
+                        AssignAst* ptr = new AssignAst($1, $3);
                         $$ = ptr;
                     }
                 | SEMI

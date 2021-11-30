@@ -48,7 +48,7 @@ class Token{
 enum class AstType{
     kAssign, kDecl, kFunDef, kFunCall, kBlock, 
     kIf, kWhile, kBreak, kContinue, kReturn,
-    kBinaryOp, kUnaryOp, kBase, kArray, kLval
+    kBinaryOp, kUnaryOp, kBase, kArray, kLval, kList
 };
 
 
@@ -58,6 +58,7 @@ class BaseAst {
     public:
         virtual ~BaseAst() = default;
         virtual void genCode(){}
+        virtual int calVal(){return 0;}
 
         AstType node_type; // 节点类型
         string addr;
@@ -69,27 +70,92 @@ class BaseAst {
 
 extern stack<BaseAst*>while_list;
 
-/*赋值语句*/
-class AssignAst: public BaseAst{
+/*变量引用*/
+class LvalAst: public BaseAst{
     public:
         string name;
-        BaseAst* exp; //有可能是表达式，也有可能是数值
+        vector<BaseAst*> list_dims;
+        int is_left_val;
 
-        AssignAst(const string &name_, BaseAst* exp_){
-            node_type = AstType::kAssign;
+        LvalAst(const string & name_){
+            node_type = AstType::kLval;
             name = name_;
-            exp = exp_;
         }
+
+        LvalAst(const string & name_, vector<BaseAst*> & list_dims_){
+            node_type = AstType::kLval;
+            name = name_;
+            for(auto i: list_dims_){
+                list_dims.push_back(i);
+            }
+        }
+
         void genCode(){
-            if (Debug_Ir) printf("Generating code for AssignAst\n");
+            if (Debug_Ir) printf("Generating code for LvalAst\n");
             SymTable* cur = var_sym_stack.top();
             auto item = cur->find(name);
             if( item == cur->end()){
                 printf("Error! Token not in this symbol table!\n");
                 return;
             }
+            addr = item->second->ir_name;
+            vector<int>offset_vec = item->second->offset_vec;
+            
+            /*此时，该引用为数组*/
+            if (offset_vec.size() > 0){
+                int tmp = temp_list.back();
+                temp_list.push_back(tmp+1);
+                temp_list.push_back(tmp+2);
+                string add_tmp = str_t + to_string(tmp+1);
+                string mul_tmp = str_t + to_string(tmp+2);
+                code_list.push_back( "var " + add_tmp);
+                code_list.push_back( "var " + mul_tmp);
+                code_list.push_back( add_tmp  + " = 0" );
+
+                for(int i = 0; i < int(list_dims.size()); ++i){
+                    list_dims[i]->genCode();
+                    code_list.push_back(mul_tmp + " = " + to_string(offset_vec[i+1]) + " * " + list_dims[i]->addr);
+                    code_list.push_back(add_tmp + " = " + add_tmp + " + " + mul_tmp );
+                }
+                code_list.push_back(add_tmp + " = " + add_tmp + " * 4");
+                if(list_dims.size() > 0){
+                    addr = addr + "[" + add_tmp + "]";
+                }
+                if(is_left_val == 0){
+                    tmp = temp_list.back();
+                    temp_list.push_back(tmp+1);
+                    string var_tmp = str_t + to_string(tmp+1);
+                    code_list.push_back( "var " + var_tmp);
+                    code_list.push_back(var_tmp + " = " + addr);
+                    addr = var_tmp;
+                }
+            }
+        }
+
+};
+
+/*赋值语句*/
+class AssignAst: public BaseAst{
+    public:
+        BaseAst* lval;
+        BaseAst* exp; //有可能是表达式，也有可能是数值
+
+        AssignAst(BaseAst* lval_, BaseAst* exp_){
+            node_type = AstType::kAssign;
+            lval = lval_;
+            exp = exp_;
+        }
+        void genCode(){
+            if (Debug_Ir) printf("Generating code for AssignAst\n");
+            SymTable* cur = var_sym_stack.top();
+            auto item = cur->find(dynamic_cast<LvalAst*>(lval)->name);
+            if( item == cur->end()){
+                printf("Error! Token not in this symbol table!\n");
+                return;
+            }
+            lval->genCode();
             exp->genCode();
-            string code_line = item->second->ir_name + " = " + exp->addr;
+            string code_line = lval->addr + " = " + exp->addr;
             code_list.push_back(code_line);
         }
 
@@ -119,15 +185,15 @@ class DeclAst: public BaseAst{
             SymTable* cur = var_sym_stack.top();
             auto item = cur->find(name);
             if( item != cur->end()){
-                printf("Error! Token already declared in this symbol table!\n");
-                return;
+                printf("Token already declared in this symbol table, Override!\n");
             }
             int tmp = native_list.back();
             native_list.push_back(tmp+1);
             addr = str_T + to_string(tmp+1);
             code_list.push_back( "var " + addr);
+
             SymItem* ptr = new SymItem(name, addr, var_type, 0);
-            cur->insert(make_pair(name, ptr));
+            (*cur)[name]=ptr;
             if(exp!=nullptr){
                 exp->genCode();
                 string code_line =  addr + " = " + exp->addr;
@@ -138,27 +204,7 @@ class DeclAst: public BaseAst{
 
 };
 
-/*变量引用*/
-class LvalAst: public BaseAst{
-    public:
-        string name;
-        LvalAst(const string & name_){
-            node_type = AstType::kLval;
-            name = name_;
-        }
 
-        void genCode(){
-            if (Debug_Ir) printf("Generating code for LvalAst\n");
-            SymTable* cur = var_sym_stack.top();
-            auto item = cur->find(name);
-            if( item == cur->end()){
-                printf("Error! Token not in this symbol table!\n");
-                return;
-            }
-            addr = item->second->ir_name;
-        }
-
-};
 
 /*函数相关*/
 
@@ -185,54 +231,8 @@ class FunDefAst: public BaseAst{
                 fun_params.push_back(i);
             }
         }
+        void genCode();
 
-        void genCode(){
-            if (Debug_Ir) printf("Generating code for FunDefAst\n");
-
-            // temp_index = temp_list.back();
-            // native_index = native_list.back();
-            // code_index = int(code_list.size());
-
-            auto item = fun_sym_table.find(name);
-            if( item != fun_sym_table.end()){
-                printf("Error! Function already declared in this symbol table!\n");
-                return;
-            }
-            addr = "f_" + name;
-            SymItem* ptr = new SymItem(name, addr, var_type, 1);
-            fun_sym_table.insert(make_pair(name, ptr));
-            SymTable* map_ptr = new SymTable();
-            if(var_sym_stack.size() > 0)
-                *map_ptr = *(var_sym_stack.top());
-            var_sym_stack.push(map_ptr);
-            SymTable* cur = var_sym_stack.top();
-
-            string code_line =  "f_" + name + "[" + to_string(fun_params.size()) + "]";
-            code_list.push_back(code_line);
-
-            int i = 0;
-            for(auto para:fun_params){
-                para->addr = "p" + to_string(i);
-                i += 1;
-                SymItem* tmp_ptr = new SymItem(((DeclAst*)para)->name, para->addr, ((DeclAst*)para)->var_type, 0);
-                cur->insert(make_pair(((DeclAst*)para)->name,tmp_ptr));
-            }
-            
-            fun_body->genCode();
-
-            var_sym_stack.pop();
-
-            code_list.push_back( "end " + addr);
-
-            // for(int i = temp_index+1; i <= temp_list.back(); ++i){
-            //     code_list.insert(code_list.begin() + code_index + 1, string(level+1,'\t') + "var t" + to_string(i));
-            // }
-
-            // for(int i = native_index+1; i <= native_list.back(); ++i){
-            //     code_list.insert(code_list.begin() + code_index + 1, string(level+1,'\t') + "var T" + to_string(i));
-            // }
-
-        }
 };
 
 class FunCallAst: public BaseAst{
@@ -286,6 +286,12 @@ class ArrayAst: public BaseAst{
 
         ArrayAst(){
             node_type = AstType::kArray;
+        }
+        ArrayAst(vector<BaseAst*> & array_list_){
+            node_type = AstType::kArray;
+            for(auto i: array_list_){
+                array_list.push_back(i);
+            }
         }
 
         void genCode(){
@@ -501,6 +507,33 @@ class BinaryOpAst: public BaseAst{
             }
         }
 
+        int calVal(){
+            if(is_const){
+                return val;
+            }else if (lt_exp == nullptr && rt_exp != nullptr){
+                return rt_exp->calVal();
+            }else if (lt_exp != nullptr && rt_exp == nullptr){
+                return lt_exp->calVal();
+            }else{
+                int tmp1 = lt_exp->calVal();
+                int tmp2 = rt_exp->calVal();
+                if (op == "+"){
+                    return tmp1 + tmp2;
+                }else if (op == "-"){
+                    return tmp1 - tmp2;
+                }else if (op == "*"){
+                    return tmp1 * tmp2;
+                }else if (op == "/"){
+                    return tmp1 * tmp2;
+                }else if (op == "%"){
+                    return tmp1 % tmp2;
+                }else{
+                    return 0;
+                }
+            }
+            
+        }
+
 };
 
 class UnaryOpAst: public BaseAst{
@@ -521,6 +554,101 @@ class UnaryOpAst: public BaseAst{
                 addr = str_t + to_string(tmp + 1);
                 code_list.push_back( "var " + addr);
                 string code_line =  addr + " = " + op + exp->addr;
+                code_list.push_back(code_line);
+            }
+        }
+};
+
+/* 数组 */
+class ListAst: public BaseAst{
+    public:
+        string name;
+        vector<BaseAst*> list_dims;
+        vector<BaseAst*> list_inits;
+        vector<int> dim_vec;
+        vector<int> offset_vec;
+        int list_size = 0;
+
+
+        
+        ListAst(const string & name_ ){
+            node_type = AstType::kList;
+            name = name_;
+        }
+
+        ListAst(const string & name_ , vector<BaseAst*> & list_dims_){
+            node_type = AstType::kList;
+            name = name_;
+            for(auto i: list_dims_){
+                list_dims.push_back(i);
+            }
+            get_dim_offset();
+        }
+        
+        ListAst(const string & name_ , vector<BaseAst*> & list_dims_, vector<BaseAst*> & list_inits_){
+            node_type = AstType::kList;
+            name = name_;
+            for(auto i: list_dims_){
+                list_dims.push_back(i);
+            }
+            for(auto i: list_inits_){
+                list_inits.push_back(i);
+            }
+            get_dim_offset();
+        }
+        void get_dim_offset(){
+            for (auto i : list_dims){
+                dim_vec.push_back(i->calVal());
+            }
+            int sz = 1;
+            for (int i: dim_vec){
+                sz *= i;
+            }
+            int mul = 1;
+            offset_vec.push_back(sz);
+            for (int i: dim_vec){
+                mul = mul * i;
+                offset_vec.push_back(sz/mul);
+            }
+            list_size = sz*4;
+            return ;
+        }
+        void genCode(){
+            if (Debug_Ir) printf("Generating code for ListAst\n");
+            SymTable* cur = var_sym_stack.top();
+            auto item = cur->find(name);
+            if( item != cur->end()){
+                printf("Token already declared in this symbol table, Override!\n");
+            }
+            int tmp = native_list.back();
+            native_list.push_back(tmp+1);
+            addr = str_T + to_string(tmp+1);
+            
+            /* 数组声明 */
+            code_list.push_back( "var " + to_string(list_size) + " " +  addr);
+            SymItem* ptr = new SymItem(name, addr, 1, 0, offset_vec);
+            (*cur)[name]=ptr;
+            
+            /* 数组初始化 */
+            set_init_val(list_inits, 0, 0);
+
+        }
+
+        void set_init_val(vector<BaseAst*> & init_vec, int level, int st){
+            int ofs = st;
+            for(int i=0; i < int(init_vec.size()); ++i){
+                if(init_vec[i]->node_type == AstType::kArray){
+                    set_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);
+                    ofs += offset_vec[level+1];
+                }else{
+                    init_vec[i]->genCode();
+                    string code_line = addr + "[" + to_string(4*ofs) + "] = " + init_vec[i]->addr;
+                    code_list.push_back(code_line);
+                    ofs += 1;
+                }
+            }
+            for(int i = ofs; i < st + offset_vec[level];++i){
+                string code_line = addr + "[" + to_string(4*i) + "] = 0";
                 code_list.push_back(code_line);
             }
         }

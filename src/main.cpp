@@ -25,11 +25,12 @@ map<AstType, string> type2str={
     {AstType::kBase, "Base"},
     {AstType::kArray, "Array"},
     {AstType::kLval, "Lval"},
+    {AstType::kList, "List"},
 };
 
 map<int, string> int2type={
-    {INT, "Int"},
-    {VOID, "Void"},
+    {1, "Int"},
+    {0, "Void"},
 };
 
 // map<int, string> int2op={
@@ -66,7 +67,7 @@ void dfsAst(BaseAst* ptr, int level){
 
     if(ptr->node_type == AstType::kAssign){
         AssignAst * new_ptr =  dynamic_cast<AssignAst*>(ptr);
-        printf("%sLeft Value name: %s\n", prefix.c_str(), new_ptr->name.c_str());
+        dfsAst(new_ptr->lval, level+1);
         dfsAst(new_ptr->exp, level+1);
     }
 
@@ -79,11 +80,16 @@ void dfsAst(BaseAst* ptr, int level){
     if(ptr->node_type == AstType::kLval){
         LvalAst * new_ptr =  dynamic_cast<LvalAst*>(ptr);
         printf("%sLeft Value name: %s\n", prefix.c_str(), new_ptr->name.c_str());
+        if (new_ptr->list_dims.size() > 0){
+            for(auto i: new_ptr->list_dims){
+                dfsAst(i, level+1);
+            }
+        }
     }
 
     if(ptr->node_type == AstType::kFunDef){
         FunDefAst * new_ptr =  dynamic_cast<FunDefAst*>(ptr);
-        printf("%sLeft Value name: %s, Value type is: %s\n", prefix.c_str(), new_ptr->name.c_str(), int2type[new_ptr->var_type].c_str());
+        printf("%sFunction Define, name: %s, Value type is: %s\n", prefix.c_str(), new_ptr->name.c_str(), int2type[new_ptr->var_type].c_str());
         dfsAst(new_ptr->fun_body, level+1);
         for(auto para: new_ptr->fun_params){
             dfsAst(para, level+1);
@@ -92,7 +98,7 @@ void dfsAst(BaseAst* ptr, int level){
 
     if(ptr->node_type == AstType::kFunCall){
         FunCallAst * new_ptr =  dynamic_cast<FunCallAst*>(ptr);
-        printf("%sLeft Value name: %s\n", prefix.c_str(), new_ptr->name.c_str());
+        printf("%sFunction Call, name: %s\n", prefix.c_str(), new_ptr->name.c_str());
         for(auto para: new_ptr->fun_params){
             dfsAst(para, level+1);
         }
@@ -152,6 +158,20 @@ void dfsAst(BaseAst* ptr, int level){
         printf("%sOp is: %s\n", prefix.c_str(), new_ptr->op.c_str());
         dfsAst(new_ptr->exp, level+1);
     }
+
+    if(ptr->node_type == AstType::kList){
+        ListAst * new_ptr =  dynamic_cast<ListAst*>(ptr);
+        printf("%sArray name is: %s\n", prefix.c_str(), new_ptr->name.c_str());
+        printf("%sdims:\n", prefix.c_str());
+        for(auto stmt: new_ptr->list_dims){
+            dfsAst(stmt, level+1);
+        }
+        printf("%sinit stmts:\n", prefix.c_str());
+        for(auto stmt: new_ptr->list_inits){
+            dfsAst(stmt, level+1);
+        }
+    }
+
     return;
 }
 
