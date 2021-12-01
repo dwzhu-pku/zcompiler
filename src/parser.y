@@ -461,7 +461,8 @@ Stmt            : LVal ASSIGN Exp SEMI
                     }
                 | SEMI
                     {
-                        ;
+                        BlockAst* ptr = new BlockAst();
+                        $$=ptr;
                     }
                 | Exp SEMI
                     {
