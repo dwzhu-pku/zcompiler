@@ -576,16 +576,14 @@ class BinaryOpAst: public BaseAst{
                 lt_exp->genCode();
                 rt_exp->genCode();
 
-                if(branch1 == "" && branch2 == "" && next == ""){
-                    int tmp = temp_list.back();
-                    temp_list.push_back(tmp + 1);
-                    addr = str_t + to_string(tmp + 1);
-                    code_list.push_back( "var " + addr);
-                    string code_line =  addr + " = " + lt_exp->addr + " " + op + " " + rt_exp->addr;
-                    code_list.push_back(code_line);
-                }else{
-                    string code_line =  "if " + lt_exp->addr + " " + op + " " + rt_exp->addr + " goto " + branch1;
-                    code_list.push_back(code_line);
+                int tmp = temp_list.back();
+                temp_list.push_back(tmp + 1);
+                addr = str_t + to_string(tmp + 1);
+                code_list.push_back( "var " + addr);
+
+                code_list.push_back(addr + " = " + lt_exp->addr + " " + op + " " + rt_exp->addr);
+                if(!(branch1 == "" && branch2 == "" && next == "")){
+                    code_list.push_back("if " + addr + " != 0 goto " + branch1);
                     code_list.push_back("goto " + branch2);
                 }
             }
