@@ -625,13 +625,14 @@ class UnaryOpAst: public BaseAst{
             // 不在 if cond 中时的行为
             if(branch1 == "" && branch2 == "" && next == ""){
                 exp->genCode();
+                int tmp = temp_list.back();
+                temp_list.push_back(tmp + 1);
+                addr = str_t + to_string(tmp + 1);
+                code_list.push_back( "var " + addr);
                 if(op != "+"){
-                    int tmp = temp_list.back();
-                    temp_list.push_back(tmp + 1);
-                    addr = str_t + to_string(tmp + 1);
-                    code_list.push_back( "var " + addr);
-                    string code_line =  addr + " = " + op + exp->addr;
-                    code_list.push_back(code_line);
+                    code_list.push_back(addr + " = " + op + exp->addr);
+                }else{
+                    code_list.push_back( addr + " = " + exp->addr);
                 }
             }else{ //在if cond中时的行为
                 if(op == "+" || op == "-"){
