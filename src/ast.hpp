@@ -129,7 +129,7 @@ class LvalAst: public BaseAst{
                     string sum_tmp = str_t + to_string(tmp+1);
                     code_list.push_back( "var " + sum_tmp);
                     code_list.push_back( sum_tmp  + " = 0" );
-                    code_list.push_back( sum_tmp + " = " + addr + " + " + sum_tmp);
+                    code_list.push_back( sum_tmp + " = " + addr + " + " + add_tmp);
                     addr = sum_tmp;
                 }
                 if(is_left_val == 0){
