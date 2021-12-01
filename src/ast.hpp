@@ -62,6 +62,8 @@ class BaseAst {
 
         AstType node_type; // 节点类型
         string addr;
+        int is_const; // 0: false; 1: true
+        int val;
 
         string branch1;
         string branch2;
@@ -91,7 +93,7 @@ class LvalAst: public BaseAst{
         }
 
         void genCode(){
-            if (Debug_Ir) printf("Generating code for LvalAst\n");
+            if (Debug_Ir) printf("Generating code for LvalAst\n" );
             SymTable* cur = var_sym_stack.top();
             auto item = cur->find(name);
             if( item == cur->end()){
@@ -135,6 +137,30 @@ class LvalAst: public BaseAst{
                 code_list.push_back(code_line);
                 code_list.push_back("goto " + branch2);
             }
+        }
+
+        int calVal(){
+            SymTable* cur = var_sym_stack.top();
+            auto item = cur->find(name);
+            if( item == cur->end()){
+                printf("Error! Token not in this symbol table!\n");
+                return 0;
+            }
+            if (item->second->ident_type != 2){ // 如果不是const，报错
+                printf("Error! Token is not a const" );
+                return 0;
+            }
+            if (list_dims.size() > 0){ // 数组
+                int tmp_ofs = 0;
+                for(int i = 0; i < int(list_dims.size()); ++i){
+                    int tmp_dim = list_dims[i]->calVal();
+                    tmp_ofs += tmp_dim * item->second->offset_vec[i+1];
+                }
+                return item->second->init_val_list[tmp_ofs];
+            }else{ // 变量
+                return item->second->init_val_list[0];
+            }
+
         }
 
 };
@@ -197,12 +223,20 @@ class DeclAst: public BaseAst{
             addr = str_T + to_string(tmp+1);
             code_list.push_back( "var " + addr);
 
-            SymItem* ptr = new SymItem(name, addr, var_type, 0);
-            (*cur)[name]=ptr;
-            if(exp!=nullptr){
-                exp->genCode();
-                string code_line =  addr + " = " + exp->addr;
-                code_list.push_back(code_line);
+            if(is_const == 0){
+                SymItem* ptr = new SymItem(name, addr, var_type, 0);
+                (*cur)[name]=ptr;
+                if(exp!=nullptr){
+                    exp->genCode();
+                    string code_line =  addr + " = " + exp->addr;
+                    code_list.push_back(code_line);
+                }
+            }else{ //如果是const，需要在符号表中写入初值
+                SymItem* ptr = new SymItem(name, addr, 2, 0);
+                int tmp_val = exp->calVal();
+                ptr->init_val_list.push_back(tmp_val);
+                (*cur)[name]=ptr;
+                code_list.push_back(addr +  " = " + to_string(tmp_val));
             }
             return ;
         }
@@ -302,6 +336,7 @@ class ArrayAst: public BaseAst{
         void genCode(){
             if (Debug_Ir) printf("Generating code for ArrayAst\n");
             for(auto i: array_list){
+                i->is_const = is_const;
                 i->genCode();
             }
         }
@@ -480,8 +515,6 @@ class BinaryOpAst: public BaseAst{
         BaseAst* lt_exp;
         BaseAst* rt_exp;
         string op;
-        int val;
-        int is_const;
 
         BinaryOpAst(BaseAst* astptr_lt, BaseAst* astptr_rt, const string & op_, int val_, int is_const_){
             node_type = AstType::kBinaryOp;
@@ -542,7 +575,7 @@ class BinaryOpAst: public BaseAst{
                     string code_line =  addr + " = " + lt_exp->addr + " " + op + " " + rt_exp->addr;
                     code_list.push_back(code_line);
                 }else{
-                    string code_line =  "if " + lt_exp->addr + " " + op + " " + rt_exp->addr + "goto " + branch1;
+                    string code_line =  "if " + lt_exp->addr + " " + op + " " + rt_exp->addr + " goto " + branch1;
                     code_list.push_back(code_line);
                     code_list.push_back("goto " + branch2);
                 }
@@ -614,6 +647,17 @@ class UnaryOpAst: public BaseAst{
                 }
             }
         }
+
+        int calVal(){
+            int tmp = exp->calVal();
+            if(op == "+"){
+                return tmp; 
+            }else if(op == "-"){
+                return -tmp;
+            }else{
+                return 0;
+            }
+        }
 };
 
 /* 数组 */
@@ -624,6 +668,7 @@ class ListAst: public BaseAst{
         vector<BaseAst*> list_inits;
         vector<int> dim_vec;
         vector<int> offset_vec;
+        vector<int> init_val_vec;
         int list_size = 0;
 
 
@@ -639,7 +684,6 @@ class ListAst: public BaseAst{
             for(auto i: list_dims_){
                 list_dims.push_back(i);
             }
-            get_dim_offset();
         }
         
         ListAst(const string & name_ , vector<BaseAst*> & list_dims_, vector<BaseAst*> & list_inits_){
@@ -651,8 +695,8 @@ class ListAst: public BaseAst{
             for(auto i: list_inits_){
                 list_inits.push_back(i);
             }
-            get_dim_offset();
         }
+
         void get_dim_offset(){
             for (auto i : list_dims){
                 dim_vec.push_back(i->calVal());
@@ -670,6 +714,7 @@ class ListAst: public BaseAst{
             list_size = sz*4;
             return ;
         }
+        
         void genCode(){
             if (Debug_Ir) printf("Generating code for ListAst\n");
             SymTable* cur = var_sym_stack.top();
@@ -681,13 +726,24 @@ class ListAst: public BaseAst{
             native_list.push_back(tmp+1);
             addr = str_T + to_string(tmp+1);
             
+            /* 数组相关计算 */
+            get_dim_offset();
+
             /* 数组声明 */
             code_list.push_back( "var " + to_string(list_size) + " " +  addr);
-            SymItem* ptr = new SymItem(name, addr, 1, 0, offset_vec);
-            (*cur)[name]=ptr;
-            
-            /* 数组初始化 */
-            set_init_val(list_inits, 0, 0);
+
+            if(is_const){
+                SymItem* ptr = new SymItem(name, addr, 2, 0, offset_vec);
+                init_val_vec.resize(list_size/4, 0);
+                get_init_val(list_inits, 0, 0);
+                ptr->init_val_list = init_val_vec;
+                (*cur)[name]=ptr;
+            }else{
+                SymItem* ptr = new SymItem(name, addr, 1, 0, offset_vec);
+                (*cur)[name]=ptr;
+                /* 数组初始化 */
+                set_init_val(list_inits, 0, 0);
+            }
 
         }
 
@@ -709,6 +765,21 @@ class ListAst: public BaseAst{
                 code_list.push_back(code_line);
             }
         }
+
+        void get_init_val(vector<BaseAst*> & init_vec, int level, int st){
+            int ofs = st;
+            for(int i=0; i < int(init_vec.size()); ++i){
+                if(init_vec[i]->node_type == AstType::kArray){
+                    set_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);
+                    ofs += offset_vec[level+1];
+                }else{
+                    init_val_vec[ofs] = init_vec[i]->calVal();
+                    code_list.push_back(addr + "[" + to_string(4*ofs) + "] = " + to_string(init_val_vec[ofs]));
+                    ofs += 1;
+                }
+            }
+        }
+
 };
 
 

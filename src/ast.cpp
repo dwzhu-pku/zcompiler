@@ -41,6 +41,7 @@ void FunDefAst::genCode(){
             (*cur)[((DeclAst*)para)->name]=tmp_ptr;
         }else{
             ListAst* list_ptr = dynamic_cast<ListAst*>(para);
+            list_ptr->get_dim_offset();
             SymItem* tmp_ptr = new SymItem(list_ptr->name, list_ptr->addr, 1, 0, list_ptr->offset_vec);
             (*cur)[list_ptr->name] = tmp_ptr;
         }

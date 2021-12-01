@@ -12,8 +12,9 @@ class SymItem{
     public:
         string ident_name;
         string ir_name;
-        int ident_type;
+        int ident_type; // 0: void; 1: int; 2: const
         int is_fun;
+        vector<int> init_val_list;
         vector<int> offset_vec;
 
         SymItem(string ident_name_, string ir_name_, int ident_type_, int is_fun_){

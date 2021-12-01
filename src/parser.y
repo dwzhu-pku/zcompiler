@@ -71,6 +71,7 @@ Decl            : ConstDecl
                 ;
 ConstDecl       : CONST INT ConstDefArr SEMI
                     {
+                        ($3)->is_const = 1;
                         $$=$3;
                     }
                 ;

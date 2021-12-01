@@ -29,8 +29,9 @@ map<AstType, string> type2str={
 };
 
 map<int, string> int2type={
-    {1, "Int"},
     {0, "Void"},
+    {1, "Int"},
+    {2, "Const"},
 };
 
 // map<int, string> int2op={
