@@ -142,8 +142,7 @@ class LvalAst: public BaseAst{
                 }
             }
             if(!(branch1 == "" && branch2 == "" && next == "")){
-                string code_line =  "if " + addr + " != 0 goto " + branch1;
-                code_list.push_back(code_line);
+                code_list.push_back("if " + addr + " != 0 goto " + branch1);
                 code_list.push_back("goto " + branch2);
             }
         }
@@ -195,8 +194,7 @@ class AssignAst: public BaseAst{
             }
             lval->genCode();
             exp->genCode();
-            string code_line = lval->addr + " = " + exp->addr;
-            code_list.push_back(code_line);
+            code_list.push_back(lval->addr + " = " + exp->addr);
         }
 
 };
@@ -237,8 +235,11 @@ class DeclAst: public BaseAst{
                 (*cur)[name]=ptr;
                 if(exp!=nullptr){
                     exp->genCode();
-                    string code_line =  addr + " = " + exp->addr;
-                    code_list.push_back(code_line);
+                    if(var_sym_stack.size() == 2){
+                        code_list.push_back(addr + " = " + to_string(exp->calVal()));
+                    }else{
+                        code_list.push_back(addr + " = " + exp->addr);
+                    }
                 }
             }else{ //如果是const，需要在符号表中写入初值
                 SymItem* ptr = new SymItem(name, addr, 2, 0);
