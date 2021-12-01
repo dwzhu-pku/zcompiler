@@ -310,6 +310,8 @@ class FunCallAst: public BaseAst{
             }
             for (auto para: fun_params){
                 para->genCode();
+            }
+            for (auto para: fun_params){
                 code_list.push_back("param " + para->addr);
             }
             // void
