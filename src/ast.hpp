@@ -120,8 +120,17 @@ class LvalAst: public BaseAst{
                     code_list.push_back(add_tmp + " = " + add_tmp + " + " + mul_tmp );
                 }
                 code_list.push_back(add_tmp + " = " + add_tmp + " * 4");
-                if(list_dims.size() > 0){
+                if(list_dims.size() + 1 == offset_vec.size()){
                     addr = addr + "[" + add_tmp + "]";
+                }
+                else{
+                    int tmp = temp_list.back();
+                    temp_list.push_back(tmp+1);
+                    string sum_tmp = str_t + to_string(tmp+1);
+                    code_list.push_back( "var " + sum_tmp);
+                    code_list.push_back( sum_tmp  + " = 0" );
+                    code_list.push_back( sum_tmp + " = " + addr + " + " + sum_tmp);
+                    addr = sum_tmp;
                 }
                 if(is_left_val == 0){
                     tmp = temp_list.back();
