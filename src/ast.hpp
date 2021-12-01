@@ -320,6 +320,11 @@ class FunCallAst: public BaseAst{
                 addr = str_t + to_string(tmp + 1);
                 code_list.push_back( "var " + addr);
                 code_list.push_back( addr + " = call " + item->second->ir_name );
+
+                if(!(branch1 == "" && branch2 == "" && next == "")){
+                    code_list.push_back("if " + addr + " != 0 goto " + branch1);
+                    code_list.push_back("goto " + branch2);
+                }
             }
         }
 };
