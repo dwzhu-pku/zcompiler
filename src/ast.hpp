@@ -131,7 +131,7 @@ class LvalAst: public BaseAst{
                 }
             }
             if(!(branch1 == "" && branch2 == "" && next == "")){
-                string code_line =  "if " + addr + " >= 1 goto " + branch1;
+                string code_line =  "if " + addr + " != 0 goto " + branch1;
                 code_list.push_back(code_line);
                 code_list.push_back("goto " + branch2);
             }
@@ -499,7 +499,11 @@ class BinaryOpAst: public BaseAst{
             if (Debug_Ir) printf("Generating code for BinaryAst\n");
             if(lt_exp == nullptr && rt_exp == nullptr){
                 addr = to_string(val);
-                
+                if (!(branch1 == "" && branch2 == "" && next == "")){
+                    string code_line = "if " + addr + " != 0 goto " + branch1;
+                    code_list.push_back(code_line);
+                    code_list.push_back("goto " + branch2);
+                }
             }else if(lt_exp == nullptr && rt_exp != nullptr){
                 rt_exp->genCode();
                 addr = rt_exp->addr;
@@ -585,14 +589,29 @@ class UnaryOpAst: public BaseAst{
             op = op_;
         }
         void genCode(){
-            exp->genCode();
-            if(op != "+"){
-                int tmp = temp_list.back();
-                temp_list.push_back(tmp + 1);
-                addr = str_t + to_string(tmp + 1);
-                code_list.push_back( "var " + addr);
-                string code_line =  addr + " = " + op + exp->addr;
-                code_list.push_back(code_line);
+            // 不在 if cond 中时的行为
+            if(branch1 == "" && branch2 == "" && next == ""){
+                exp->genCode();
+                if(op != "+"){
+                    int tmp = temp_list.back();
+                    temp_list.push_back(tmp + 1);
+                    addr = str_t + to_string(tmp + 1);
+                    code_list.push_back( "var " + addr);
+                    string code_line =  addr + " = " + op + exp->addr;
+                    code_list.push_back(code_line);
+                }
+            }else{ //在if cond中时的行为
+                if(op == "+" || op == "-"){
+                    exp->branch1 = branch1;
+                    exp->branch2 = branch2;
+                    exp->next = next;
+                    exp->genCode();
+                }else{
+                    exp->branch1 = branch2;
+                    exp->branch2 = branch1;
+                    exp->next = next;
+                    exp->genCode();
+                }
             }
         }
 };
