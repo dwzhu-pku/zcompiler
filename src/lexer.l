@@ -5,10 +5,14 @@
     #include"parser.tab.hpp"
 %}
 
-digit   [0-9]
+digit_10   [0-9]
+digit_8   [0-7]
+digit_16   [0-9A-Fa-f]
 letter  [a-zA-Z_]
-identity    {letter}({letter}|{digit})*
-number  {digit}+ 
+identity    {letter}({letter}|{digit_10})*
+number_10  [1-9]{digit_10}* 
+number_8  0{digit_8}* 
+number_16  (0x|0X){digit_16}* 
 
 %%
 [ \r\n\t]   {   if(Debug_Lex)   printf("Whitespace, Ignored!\n");}
@@ -130,8 +134,22 @@ return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN\n
             }
 
     /*常量*/
-{number}    {
-                int num = atoi(yytext);
+{number_10}    {
+                int num = int(strtol(yytext, nullptr, 10));
+                if(Debug_Lex)   printf("Recognized Literal %d\n",num);
+                yylval.kToken = new Token (VAL_CONST, num, yylineno);
+                return VAL_CONST;
+            }
+
+{number_8}    {
+                int num = int(strtol(yytext, nullptr, 8));
+                if(Debug_Lex)   printf("Recognized Literal %d\n",num);
+                yylval.kToken = new Token (VAL_CONST, num, yylineno);
+                return VAL_CONST;
+            }
+
+{number_16}    {
+                int num = int(strtol(yytext, nullptr, 16));
                 if(Debug_Lex)   printf("Recognized Literal %d\n",num);
                 yylval.kToken = new Token (VAL_CONST, num, yylineno);
                 return VAL_CONST;
