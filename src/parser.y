@@ -334,7 +334,17 @@ LVal            : IDENT
 
 FuncDef         : VOID IDENT LKHX RKHX Block
                     {
-                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, $5);
+                        BlockAst* tmp_ptr = dynamic_cast<BlockAst*>($5);
+                        int flag = 0;
+                        for (auto i: tmp_ptr->list_stmts){
+                            if (i->node_type == AstType::kReturn){
+                                flag = 1; break;
+                            } 
+                        }
+                        if (flag == 0){
+                            tmp_ptr->append_stmt(new ReturnAst(nullptr, nullptr));
+                        }
+                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, tmp_ptr);
                         $$ = ptr;
                     }
                 | INT IDENT LKHX RKHX Block
@@ -345,7 +355,19 @@ FuncDef         : VOID IDENT LKHX RKHX Block
                 | VOID IDENT LKHX FuncFParams RKHX Block
                     {
                         if(Debug_Parser)    printf("Trace: FuncDef\n");
-                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, $6, dynamic_cast<ArrayAst*>($4)->array_list);
+
+                        BlockAst* tmp_ptr = dynamic_cast<BlockAst*>($6);
+                        int flag = 0;
+                        for (auto i: tmp_ptr->list_stmts){
+                            if (i->node_type == AstType::kReturn){
+                                flag = 1; break;
+                            } 
+                        }
+                        if (flag == 0){
+                            tmp_ptr->append_stmt(new ReturnAst(nullptr, nullptr));
+                        }
+
+                        FunDefAst* ptr = new FunDefAst(0, ($2)->ident_name, tmp_ptr, dynamic_cast<ArrayAst*>($4)->array_list);
                         $$ = ptr;
                     }
                 | INT IDENT LKHX FuncFParams RKHX Block
