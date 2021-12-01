@@ -379,9 +379,17 @@ class BlockAst: public BaseAst{
 
         void genCode(){
             if (Debug_Ir) printf("Generating code for BlockAst\n");
+            SymTable* map_ptr = new SymTable();
+            if(var_sym_stack.size() > 0)
+                *map_ptr = *(var_sym_stack.top());
+            var_sym_stack.push(map_ptr);
+
             for(auto i: list_stmts){
                 i->genCode();
             }
+
+            var_sym_stack.pop();
+
         }
 };
 
