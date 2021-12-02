@@ -64,6 +64,7 @@ class BaseAst {
         string addr;
         int is_const; // 0: false; 1: true
         int val;
+        int lineno;
 
         string branch1;
         string branch2;
@@ -301,35 +302,7 @@ class FunCallAst: public BaseAst{
             }
         }
 
-        void genCode(){
-            if (Debug_Ir) printf("Generating code for FunCallAst\n");
-            auto item = fun_sym_table.find(name);
-            if( item == fun_sym_table.end()){
-                printf("Error! Function not declared in this symbol table!\n");
-                return;
-            }
-            for (auto para: fun_params){
-                para->genCode();
-            }
-            for (auto para: fun_params){
-                code_list.push_back("param " + para->addr);
-            }
-            // void
-            if (item->second->ident_type == 0){
-                code_list.push_back("call " + item->second->ir_name );
-            }else{ // int
-                int tmp = temp_list.back();
-                temp_list.push_back(tmp + 1);
-                addr = str_t + to_string(tmp + 1);
-                code_list.push_back( "var " + addr);
-                code_list.push_back( addr + " = call " + item->second->ir_name );
-
-                if(!(branch1 == "" && branch2 == "" && next == "")){
-                    code_list.push_back("if " + addr + " != 0 goto " + branch1);
-                    code_list.push_back("goto " + branch2);
-                }
-            }
-        }
+        void genCode();
 };
 
 class ArrayAst: public BaseAst{

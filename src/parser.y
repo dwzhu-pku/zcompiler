@@ -261,11 +261,13 @@ UnaryExp        : PrimaryExp
                 | IDENT LKHX RKHX
                     {
                         FunCallAst* ptr = new FunCallAst(($1)->ident_name);
+                        ptr->lineno = ($1)->line_no;
                         $$ = ptr;
                     }
                 | IDENT LKHX FuncRParams RKHX
                     {
                         FunCallAst* ptr = new FunCallAst(($1)->ident_name, dynamic_cast<ArrayAst*>($3)->array_list);
+                        ptr->lineno = ($1)->line_no;
                         $$ = ptr;
                     }
                 | ADD UnaryExp

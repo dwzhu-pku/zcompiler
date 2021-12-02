@@ -192,8 +192,11 @@ void getRuntimeFun(){
     ptr = new SymItem("getarray", "f_getarray", 1, 1);
     fun_sym_table.insert(make_pair("getarray", ptr));
 
-    ptr = new SymItem("putarray", "f_putarray", 0, 1);
-    fun_sym_table.insert(make_pair("putarray", ptr));
+    ptr = new SymItem("_sysy_starttime", "f__sysy_starttime", 0, 1);
+    fun_sym_table.insert(make_pair("_sysy_starttime", ptr));
+
+    ptr = new SymItem("_sysy_stoptime", "f__sysy_stoptime", 0, 1);
+    fun_sym_table.insert(make_pair("_sysy_stoptime", ptr));
 }
 
 void reorderCode(){
