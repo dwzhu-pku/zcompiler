@@ -29,9 +29,7 @@ class SymItem{
             ir_name = ir_name_;
             ident_type = ident_type_;
             is_fun = is_fun_;
-            for(auto i: offset_vec_){
-                offset_vec.push_back(i);
-            }
+            offset_vec = offset_vec_;
         }
 };
 

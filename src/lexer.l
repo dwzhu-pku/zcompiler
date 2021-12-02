@@ -160,8 +160,7 @@ return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN, 
 "/*"[^"*"]*(\*+[^"*/"][^"*"]*)*\*+"/"  { if(Debug_Lex)    printf("Comments, Ignored!");}
 
     /*其它情况直接返回*/
-.           {
-                if(Debug_Lex)    printf("Other Cases: %s, lineno is %d\n", yytext, yylineno);
+.           {   if(Debug_Lex)    printf("Other Cases: %s, lineno is %d\n", yytext, yylineno);
                 return yytext[0];
             }
 

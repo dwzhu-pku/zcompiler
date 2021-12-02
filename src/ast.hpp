@@ -70,6 +70,9 @@ class LvalAst: public BaseAst{
         vector<BaseAst*> list_dims;
         int is_left_val;
 
+        void genCode();
+        int calVal();
+
         LvalAst(const string & name_){
             node_type = AstType::kLval;
             name = name_;
@@ -78,37 +81,8 @@ class LvalAst: public BaseAst{
         LvalAst(const string & name_, vector<BaseAst*> & list_dims_){
             node_type = AstType::kLval;
             name = name_;
-            for(auto i: list_dims_){
-                list_dims.push_back(i);
-            }
+            list_dims = list_dims_;
         }
-
-        void genCode();
-        
-        int calVal(){
-            SymTable* cur = var_sym_stack.top();
-            auto item = cur->find(name);
-            if( item == cur->end()){
-                printf("Error! Token not in this symbol table!\n");
-                return 0;
-            }
-            if (item->second->ident_type != 2){ // 如果不是const，报错
-                printf("Error! Token is not a const" );
-                return 0;
-            }
-            if (list_dims.size() > 0){ // 数组
-                int tmp_ofs = 0;
-                for(int i = 0; i < int(list_dims.size()); ++i){
-                    int tmp_dim = list_dims[i]->calVal();
-                    tmp_ofs += tmp_dim * item->second->offset_vec[i+1];
-                }
-                return item->second->init_val_list[tmp_ofs];
-            }else{ // 变量
-                return item->second->init_val_list[0];
-            }
-
-        }
-
 };
 
 /*赋值语句*/
@@ -117,12 +91,13 @@ class AssignAst: public BaseAst{
         BaseAst* lval;
         BaseAst* exp; //有可能是表达式，也有可能是数值
 
+        void genCode();
+
         AssignAst(BaseAst* lval_, BaseAst* exp_){
             node_type = AstType::kAssign;
             lval = lval_;
             exp = exp_;
         }
-        void genCode();
 
 };
 
@@ -133,11 +108,14 @@ class DeclAst: public BaseAst{
         string name;
         BaseAst* exp; //有可能是表达式，也有可能是数值
 
+        void genCode();
+
         DeclAst(int var_type_ , const string & name_){
             node_type = AstType::kDecl;
             var_type = var_type_;
             name = name_;
         }
+
         DeclAst(int var_type_ , const string & name_, BaseAst* exp_){
             node_type = AstType::kDecl;
             var_type = var_type_;
@@ -145,7 +123,6 @@ class DeclAst: public BaseAst{
             exp = exp_;
         }
 
-        void genCode();
 
 };
 
@@ -160,6 +137,8 @@ class FunDefAst: public BaseAst{
         BaseAst* fun_body;
         vector<BaseAst*> fun_params; //形参
 
+        void genCode();
+
         FunDefAst(int var_type_, const string & name_, BaseAst* fun_body_){
             node_type = AstType::kFunDef;
             var_type = var_type_;
@@ -172,11 +151,8 @@ class FunDefAst: public BaseAst{
             var_type = var_type_;
             name = name_;
             fun_body = fun_body_;
-            for(auto i: fun_params_){
-                fun_params.push_back(i);
-            }
+            fun_params = fun_params_;
         }
-        void genCode();
 
 };
 
@@ -185,25 +161,26 @@ class FunCallAst: public BaseAst{
         string name;
         vector<BaseAst*> fun_params; //实参
 
+        void genCode();
+
         FunCallAst(const string & name_){
             node_type = AstType::kFunCall;
             name = name_;
         }
+
         FunCallAst(const string & name_, vector<BaseAst*> & fun_params_){
             node_type = AstType::kFunCall;
             name = name_;
-            for(auto i: fun_params_){
-                fun_params.push_back(i);
-            }
+            fun_params = fun_params_;
         }
 
-        void genCode();
 };
 
 class ArrayAst: public BaseAst{
     public:
         vector<BaseAst*> array_list; //实参
 
+        void genCode();
         void append_item(BaseAst* ptr){
             array_list.push_back(ptr);
         }
@@ -213,12 +190,9 @@ class ArrayAst: public BaseAst{
         }
         ArrayAst(vector<BaseAst*> & array_list_){
             node_type = AstType::kArray;
-            for(auto i: array_list_){
-                array_list.push_back(i);
-            }
+            array_list = array_list_;
         }
 
-        void genCode();
 
 };
 
@@ -228,21 +202,21 @@ class BlockAst: public BaseAst{
     public:
         vector<BaseAst*> list_stmts;
 
-        BlockAst(){
-            node_type = AstType::kBlock;
-        }
-        BlockAst(vector<BaseAst*> &list_stmts_){
-            node_type = AstType::kBlock;
-            for(auto i: list_stmts_){
-                list_stmts.push_back(i);
-            }
-        }
-
+        void genCode();
         void append_stmt(BaseAst* ast_ptr){
             list_stmts.push_back(ast_ptr);
         }
 
-        void genCode();
+        BlockAst(){
+            node_type = AstType::kBlock;
+        }
+
+        BlockAst(vector<BaseAst*> &list_stmts_){
+            node_type = AstType::kBlock;
+            list_stmts = list_stmts_;
+        }
+
+
 };
 
 /*控制流相关*/
@@ -253,6 +227,8 @@ class IfAst: public BaseAst{
         BaseAst* if_then_stmt;
         BaseAst* else_stmt;
 
+        void genCode();
+
         IfAst(BaseAst* if_cond_, BaseAst* if_then_stmt_, BaseAst* else_stmt_){
             node_type = AstType::kIf;
             if_cond = if_cond_;
@@ -260,7 +236,6 @@ class IfAst: public BaseAst{
             else_stmt = else_stmt_;
         }
 
-        void genCode();
 };
 
 class WhileAst: public BaseAst{
@@ -268,30 +243,31 @@ class WhileAst: public BaseAst{
         BaseAst* while_cond;
         BaseAst* while_stmt;
 
+        void genCode();
+
         WhileAst(BaseAst* while_cond_, BaseAst* while_stmt_){
             node_type = AstType::kWhile;
             while_cond = while_cond_;
             while_stmt = while_stmt_;
         }
 
-        void genCode();
 
 };
 
 class BreakAst: public BaseAst{
     public:
+        void genCode();
         BreakAst(){
             node_type = AstType::kBreak;
         }
-        void genCode();
 };
 
 class ContinueAst: public BaseAst{
     public:
+        void genCode();
         ContinueAst(){
             node_type = AstType::kContinue;
         }
-        void genCode();
 };
 
 class ReturnAst: public BaseAst{
@@ -299,12 +275,13 @@ class ReturnAst: public BaseAst{
         BaseAst* next;
         BaseAst* exp;
 
+        void genCode();
+
         ReturnAst(BaseAst* next_, BaseAst* exp_){
             node_type = AstType::kReturn;
             next = next_;
             exp = exp_;
         }
-        void genCode();
 };
 
 
@@ -315,6 +292,9 @@ class BinaryOpAst: public BaseAst{
         BaseAst* lt_exp;
         BaseAst* rt_exp;
         string op;
+
+        void genCode();
+        int calVal();
 
         BinaryOpAst(BaseAst* astptr_lt, BaseAst* astptr_rt, const string & op_, int val_, int is_const_){
             node_type = AstType::kBinaryOp;
@@ -327,36 +307,6 @@ class BinaryOpAst: public BaseAst{
             branch2 = "";
             next = "";
         }
-
-        void genCode();
-
-        int calVal(){
-            if(is_const){
-                return val;
-            }else if (lt_exp == nullptr && rt_exp != nullptr){
-                return rt_exp->calVal();
-            }else if (lt_exp != nullptr && rt_exp == nullptr){
-                return lt_exp->calVal();
-            }else{
-                int tmp1 = lt_exp->calVal();
-                int tmp2 = rt_exp->calVal();
-                if (op == "+"){
-                    return tmp1 + tmp2;
-                }else if (op == "-"){
-                    return tmp1 - tmp2;
-                }else if (op == "*"){
-                    return tmp1 * tmp2;
-                }else if (op == "/"){
-                    return tmp1 * tmp2;
-                }else if (op == "%"){
-                    return tmp1 % tmp2;
-                }else{
-                    return 0;
-                }
-            }
-            
-        }
-
 };
 
 class UnaryOpAst: public BaseAst{
@@ -364,22 +314,13 @@ class UnaryOpAst: public BaseAst{
         BaseAst* exp;
         string op;
 
+        void genCode();
+        int calVal();
+
         UnaryOpAst(BaseAst* astptr, const string & op_){
             node_type = AstType::kUnaryOp;
             exp = astptr;
             op = op_;
-        }
-        void genCode();
-
-        int calVal(){
-            int tmp = exp->calVal();
-            if(op == "+"){
-                return tmp; 
-            }else if(op == "-"){
-                return -tmp;
-            }else{
-                return 0;
-            }
         }
 };
 
@@ -393,6 +334,7 @@ class ListAst: public BaseAst{
         vector<int> offset_vec;
         vector<int> init_val_vec;
         int list_size = 0;
+        void genCode();
         
         ListAst(const string & name_ ){
             node_type = AstType::kList;
@@ -402,20 +344,14 @@ class ListAst: public BaseAst{
         ListAst(const string & name_ , vector<BaseAst*> & list_dims_){
             node_type = AstType::kList;
             name = name_;
-            for(auto i: list_dims_){
-                list_dims.push_back(i);
-            }
+            list_dims = list_dims_;
         }
         
         ListAst(const string & name_ , vector<BaseAst*> & list_dims_, vector<BaseAst*> & list_inits_){
             node_type = AstType::kList;
             name = name_;
-            for(auto i: list_dims_){
-                list_dims.push_back(i);
-            }
-            for(auto i: list_inits_){
-                list_inits.push_back(i);
-            }
+            list_dims = list_dims_;
+            list_inits = list_inits_;
         }
 
         void get_dim_offset(){
@@ -436,7 +372,6 @@ class ListAst: public BaseAst{
             return ;
         }
         
-        void genCode();
 
         void set_init_val(vector<BaseAst*> & init_vec, int level, int st){
             int ofs = st;

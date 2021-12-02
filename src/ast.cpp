@@ -393,5 +393,66 @@ void ListAst::genCode(){
         /* 数组初始化 */
         set_init_val(list_inits, 0, 0);
     }
-
 }
+
+int LvalAst::calVal(){
+    SymTable* cur = var_sym_stack.top();
+    auto item = cur->find(name);
+    if( item == cur->end()){
+        printf("Error! Token not in this symbol table!\n");
+        return 0;
+    }
+    if (item->second->ident_type != 2){ // 如果不是const，报错
+        printf("Error! Token is not a const" );
+        return 0;
+    }
+    if (list_dims.size() > 0){ // 数组
+        int tmp_ofs = 0;
+        for(int i = 0; i < int(list_dims.size()); ++i){
+            int tmp_dim = list_dims[i]->calVal();
+            tmp_ofs += tmp_dim * item->second->offset_vec[i+1];
+        }
+        return item->second->init_val_list[tmp_ofs];
+    }else{ // 变量
+        return item->second->init_val_list[0];
+    }
+}
+
+int BinaryOpAst::calVal(){
+    if(is_const){
+        return val;
+    }else if (lt_exp == nullptr && rt_exp != nullptr){
+        return rt_exp->calVal();
+    }else if (lt_exp != nullptr && rt_exp == nullptr){
+        return lt_exp->calVal();
+    }else{
+        int tmp1 = lt_exp->calVal();
+        int tmp2 = rt_exp->calVal();
+        if (op == "+"){
+            return tmp1 + tmp2;
+        }else if (op == "-"){
+            return tmp1 - tmp2;
+        }else if (op == "*"){
+            return tmp1 * tmp2;
+        }else if (op == "/"){
+            return tmp1 * tmp2;
+        }else if (op == "%"){
+            return tmp1 % tmp2;
+        }else{
+            return 0;
+        }
+    }
+}
+
+int UnaryOpAst::calVal(){
+    int tmp = exp->calVal();
+    if(op == "+"){
+        return tmp; 
+    }else if(op == "-"){
+        return -tmp;
+    }else{
+        return 0;
+    }
+}
+
+
