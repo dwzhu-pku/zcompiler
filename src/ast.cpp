@@ -59,6 +59,7 @@ void FunDefAst::genCode(){
 void FunCallAst::genCode(){
     if (Debug_Ir) printf("Generating code for FunCallAst\n");
     if(name == "starttime" || name == "stoptime") {
+        exit(-1);
         name = "_sysy_" + name;
         fun_params.push_back(new BinaryOpAst(nullptr, nullptr, "",lineno, 1));
     }
