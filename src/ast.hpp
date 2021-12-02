@@ -729,7 +729,7 @@ class ListAst: public BaseAst{
             /* 数组声明 */
             code_list.push_back( "var " + to_string(list_size) + " " +  addr);
 
-            if(is_const){
+            if(is_const || var_sym_stack.size() == 2){ // 常量或全局数组
                 SymItem* ptr = new SymItem(name, addr, 2, 0, offset_vec);
                 init_val_vec.resize(list_size/4, 0);
                 get_init_val(list_inits, 0, 0);
