@@ -1,0 +1,15 @@
+int main(){
+    int a=10;
+    while(!!(a+1)){
+        a=a-1;
+        if(a==4){
+            putint(a);
+        }else if (a > 3){
+            continue;
+        }
+        continue;
+        
+    }
+    putint(a);
+    return 0;
+}

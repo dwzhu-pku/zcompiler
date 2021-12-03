@@ -1,0 +1,76 @@
+f_main[0]
+var t15
+var t14
+var t13
+var t12
+var t11
+var t10
+var t9
+var t8
+var t7
+var t6
+var t5
+var t4
+var T5
+var t3
+var 32 T4
+var t2
+var t1
+var t0
+var 12 T3
+var 24 T2
+var 12 T1
+var T0
+T0 = 0
+T1[0] = 0
+T1[4] = 0
+T1[8] = 0
+T2[0] = 1
+T2[4] = 2
+T2[8] = 3
+T2[12] = 4
+T2[16] = 5
+T2[20] = 6
+t0 = 0
+t1 = 1 * 1
+t0 = t0 + t1
+t0 = t0 * 4
+t2 = T1[t0]
+T3[0] = t2
+T3[4] = 2
+T3[8] = 0
+t3 = 1 + 1
+T4[0] = t3
+T4[4] = 2
+T4[8] = 3
+T4[12] = 0
+T4[16] = 5
+T4[20] = 0
+T4[24] = 7
+T4[28] = 8
+t4 = 0
+t6 = 1 + 1
+t5 = 2 * t6
+t4 = t4 + t5
+t5 = 1 * 1
+t4 = t4 + t5
+t4 = t4 * 4
+t7 = T2[t4]
+T5 = t7
+t8 = 0
+t9 = 1 * 2
+t8 = t8 + t9
+t8 = t8 * 4
+t10 = 0
+t11 = 1 * 1
+t10 = t10 + t11
+t10 = t10 * 4
+t12 = T1[t10]
+T3[t8] = t12
+t13 = 0
+t14 = 1 * 2
+t13 = t13 + t14
+t13 = t13 * 4
+t15 = T3[t13]
+return t15
+end f_main

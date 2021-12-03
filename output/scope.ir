@@ -1,0 +1,15 @@
+f_main[0]
+var t0
+var T2
+var T1
+var T0
+T0 = 2
+T1 = 3
+t0 = T0 + 1
+T2 = t0
+param T0
+call f_putint
+param T2
+call f_putint
+return 0
+end f_main

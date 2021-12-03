@@ -1,0 +1,36 @@
+f_main[0]
+var T1
+var t0
+var T0
+t0 = T0 - 2
+if t0 != 0 goto l0
+goto l3
+l3:
+if 1 != 0 goto l0
+goto l1
+l0:
+param 2
+call f_putint
+goto l2
+l1:
+param 3
+call f_putint
+goto l2
+l2:
+if 2 != 0 goto l4
+goto l5
+l4:
+T1 = 4
+goto l6
+l5:
+goto l6
+l6:
+if 1 != 0 goto l7
+goto l8
+l7:
+goto l9
+l8:
+goto l9
+l9:
+return 0
+end f_main

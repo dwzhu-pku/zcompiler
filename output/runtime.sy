@@ -1,0 +1,16 @@
+f_main[0]
+	var T0
+	var t1
+	var t0
+	t0 = call f_getint
+	T0 = t0
+	param T0
+	call f_putint
+	t1 = call f_getch
+	T0 = t1
+	param T0
+	call f_putint
+	param 65
+	call f_putch
+	return 0
+end f_main

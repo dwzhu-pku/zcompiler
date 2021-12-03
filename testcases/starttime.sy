@@ -1,0 +1,13 @@
+void foo(int n) {
+  starttime();
+  int a = a+1;
+  stoptime();
+}
+
+int main() {
+  starttime();
+  int a = a + 1;
+  stoptime();
+  foo(2);
+  return 0;
+}

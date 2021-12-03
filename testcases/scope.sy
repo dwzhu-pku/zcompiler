@@ -1,0 +1,4 @@
+int main(){
+    {int a = 2; {int a = 3; }  int b = a + 1;putint(a);putint(b);}
+    return 0;
+}

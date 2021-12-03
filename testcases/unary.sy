@@ -1,0 +1,8 @@
+int main(){
+    int a;
+    a = +++1;
+    int b = +-+1;
+    putint(a);
+    putint(b);
+    return 0;
+}

@@ -1,0 +1,7 @@
+int main(){
+    int a = 0x16;
+    putint(a);
+    int b = 017;
+    putint(b+a);
+    return 0;
+}

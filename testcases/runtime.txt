@@ -1,0 +1,9 @@
+int main(){
+    int n;
+    n = getint();
+    putint(n);
+    n = getch();
+    putint(n);
+    putch(65);
+    return 0;
+}

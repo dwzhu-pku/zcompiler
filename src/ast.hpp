@@ -396,7 +396,7 @@ class ListAst: public BaseAst{
             int ofs = st;
             for(int i=0; i < int(init_vec.size()); ++i){
                 if(init_vec[i]->node_type == AstType::kArray){
-                    set_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);
+                    get_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);
                     ofs += offset_vec[level+1];
                 }else{
                     init_val_vec[ofs] = init_vec[i]->calVal();

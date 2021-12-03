@@ -1,0 +1,445 @@
+f_func1[3]
+var t3
+var t2
+var t1
+var t0
+t0 = p2 == 0
+if t0 != 0 goto l0
+goto l1
+l0:
+t1 = p0 * p1
+return t1
+goto l2
+l1:
+t2 = p1 - p2
+param p0
+param t2
+param 0
+t3 = call f_func1
+return t3
+goto l2
+l2:
+end f_func1
+f_func2[2]
+var t5
+var t4
+if p1 != 0 goto l3
+goto l4
+l3:
+t4 = p0 % p1
+param t4
+param 0
+t5 = call f_func2
+return t5
+goto l5
+l4:
+return p0
+goto l5
+l5:
+end f_func2
+f_func3[2]
+var t9
+var t8
+var t7
+var t6
+t6 = p1 == 0
+if t6 != 0 goto l6
+goto l7
+l6:
+t7 = p0 + 1
+return t7
+goto l8
+l7:
+t8 = p0 + p1
+param t8
+param 0
+t9 = call f_func3
+return t9
+goto l8
+l8:
+end f_func3
+f_func4[3]
+if p0 != 0 goto l9
+goto l10
+l9:
+return p1
+goto l11
+l10:
+return p2
+goto l11
+l11:
+end f_func4
+f_func5[1]
+var t10
+t10 = -p0
+return t10
+end f_func5
+f_func6[2]
+if p0 != 0 goto l15
+goto l13
+l15:
+if p1 != 0 goto l12
+goto l13
+l12:
+return 1
+goto l14
+l13:
+return 0
+goto l14
+l14:
+end f_func6
+f_func7[1]
+if p0 != 0 goto l17
+goto l16
+l16:
+return 1
+goto l18
+l17:
+return 0
+goto l18
+l18:
+end f_func7
+f_main[0]
+var t113
+var t112
+var t111
+var t110
+var t109
+var t108
+var t107
+var t106
+var t105
+var t104
+var t103
+var t102
+var t101
+var t100
+var t99
+var t98
+var t97
+var t96
+var t95
+var t94
+var t93
+var t92
+var t91
+var t90
+var t89
+var t88
+var t87
+var t86
+var t85
+var t84
+var t83
+var t82
+var t81
+var t80
+var t79
+var t78
+var t77
+var t76
+var t75
+var t74
+var t73
+var t72
+var t71
+var t70
+var t69
+var t68
+var t67
+var t66
+var t65
+var t64
+var t63
+var t62
+var t61
+var t60
+var t59
+var t58
+var t57
+var t56
+var t55
+var t54
+var t53
+var t52
+var t51
+var t50
+var t49
+var t48
+var t47
+var t46
+var t45
+var t44
+var t43
+var t42
+var t41
+var t40
+var t39
+var t38
+var t37
+var t36
+var t35
+var t34
+var t33
+var t32
+var t31
+var t30
+var t29
+var t28
+var t27
+var t26
+var t25
+var t24
+var t23
+var t22
+var t21
+var t20
+var T6
+var t19
+var t18
+var t17
+var t16
+var t15
+var T5
+var 40 T4
+var t14
+var T3
+var t13
+var T2
+var t12
+var T1
+var t11
+var T0
+t11 = call f_getint
+T0 = t11
+t12 = call f_getint
+T1 = t12
+t13 = call f_getint
+T2 = t13
+t14 = call f_getint
+T3 = t14
+T4[0] = 0
+T4[4] = 0
+T4[8] = 0
+T4[12] = 0
+T4[16] = 0
+T4[20] = 0
+T4[24] = 0
+T4[28] = 0
+T4[32] = 0
+T4[36] = 0
+T5 = 0
+l19:
+t15 = T5 < 10
+if t15 != 0 goto l20
+goto l21
+l20:
+t16 = 0
+t17 = 1 * T5
+t16 = t16 + t17
+t16 = t16 * 4
+t18 = call f_getint
+T4[t16] = t18
+t19 = T5 + 1
+T5 = t19
+goto l19
+l21:
+param T0
+t20 = call f_func7
+param T1
+t21 = call f_func5
+param t20
+param t21
+t22 = call f_func6
+param t22
+param T2
+t23 = call f_func2
+param t23
+param T3
+t24 = call f_func3
+param t24
+t25 = call f_func5
+t26 = 0
+t27 = 1 * 0
+t26 = t26 + t27
+t26 = t26 * 4
+t28 = T4[t26]
+t29 = 0
+t30 = 1 * 1
+t29 = t29 + t30
+t29 = t29 * 4
+t31 = T4[t29]
+param t31
+t32 = call f_func5
+t33 = 0
+t34 = 1 * 2
+t33 = t33 + t34
+t33 = t33 * 4
+t35 = T4[t33]
+t36 = 0
+t37 = 1 * 3
+t36 = t36 + t37
+t36 = t36 * 4
+t38 = T4[t36]
+param t38
+t39 = call f_func7
+param t35
+param t39
+t40 = call f_func6
+t41 = 0
+t42 = 1 * 4
+t41 = t41 + t42
+t41 = t41 * 4
+t43 = T4[t41]
+t44 = 0
+t45 = 1 * 5
+t44 = t44 + t45
+t44 = t44 * 4
+t46 = T4[t44]
+param t46
+t47 = call f_func7
+param t43
+param t47
+t48 = call f_func2
+param t32
+param t40
+param t48
+t49 = call f_func4
+t50 = 0
+t51 = 1 * 6
+t50 = t50 + t51
+t50 = t50 * 4
+t52 = T4[t50]
+param t49
+param t52
+t53 = call f_func3
+t54 = 0
+t55 = 1 * 7
+t54 = t54 + t55
+t54 = t54 * 4
+t56 = T4[t54]
+param t53
+param t56
+t57 = call f_func2
+t58 = 0
+t59 = 1 * 8
+t58 = t58 + t59
+t58 = t58 * 4
+t60 = T4[t58]
+t61 = 0
+t62 = 1 * 9
+t61 = t61 + t62
+t61 = t61 * 4
+t63 = T4[t61]
+param t63
+t64 = call f_func7
+param t60
+param t64
+t65 = call f_func3
+param t57
+param t65
+param T0
+t66 = call f_func1
+param t25
+param t28
+param t66
+t67 = call f_func4
+param T2
+t68 = call f_func7
+param t68
+param T3
+t69 = call f_func3
+param T1
+param t69
+t70 = call f_func2
+param t67
+param t70
+t71 = call f_func3
+t72 = 0
+t73 = 1 * 0
+t72 = t72 + t73
+t72 = t72 * 4
+t74 = T4[t72]
+t75 = 0
+t76 = 1 * 1
+t75 = t75 + t76
+t75 = t75 * 4
+t77 = T4[t75]
+param t71
+param t74
+param t77
+t78 = call f_func1
+t79 = 0
+t80 = 1 * 2
+t79 = t79 + t80
+t79 = t79 * 4
+t81 = T4[t79]
+param t78
+param t81
+t82 = call f_func2
+t83 = 0
+t84 = 1 * 3
+t83 = t83 + t84
+t83 = t83 * 4
+t85 = T4[t83]
+t86 = 0
+t87 = 1 * 4
+t86 = t86 + t87
+t86 = t86 * 4
+t88 = T4[t86]
+t89 = 0
+t90 = 1 * 5
+t89 = t89 + t90
+t89 = t89 * 4
+t91 = T4[t89]
+param t91
+t92 = call f_func5
+param t88
+param t92
+t93 = call f_func3
+t94 = 0
+t95 = 1 * 6
+t94 = t94 + t95
+t94 = t94 * 4
+t96 = T4[t94]
+param t96
+t97 = call f_func5
+param t93
+param t97
+t98 = call f_func2
+t99 = 0
+t100 = 1 * 7
+t99 = t99 + t100
+t99 = t99 * 4
+t101 = T4[t99]
+t102 = 0
+t103 = 1 * 8
+t102 = t102 + t103
+t102 = t102 * 4
+t104 = T4[t102]
+param t104
+t105 = call f_func7
+param t98
+param t101
+param t105
+t106 = call f_func1
+t107 = 0
+t108 = 1 * 9
+t107 = t107 + t108
+t107 = t107 * 4
+t109 = T4[t107]
+param t109
+t110 = call f_func5
+param t106
+param t110
+t111 = call f_func2
+param t111
+param T0
+t112 = call f_func3
+param t82
+param t85
+param t112
+t113 = call f_func1
+T6 = t113
+return T6
+end f_main
