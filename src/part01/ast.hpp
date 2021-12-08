@@ -404,6 +404,10 @@ class ListAst: public BaseAst{
                     ofs += 1;
                 }
             }
+            // for(int i = ofs; i < st + offset_vec[level];++i){
+            //     string code_line = addr + "[" + to_string(4*i) + "] = 0";
+            //     code_list.push_back(code_line);
+            // }
         }
 
 };
