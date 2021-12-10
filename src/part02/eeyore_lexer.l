@@ -33,8 +33,9 @@ goto    {   if(Debug_Lex)   printf("Recognized control flow keyword GOTO, lineno
         }
 
 {label}    {   if(Debug_Lex)   printf("Recognized control flow keyword LABEL, lineno is %d\n", yylineno);
-                    return LABEL;
-                }
+                yylval.kToken = new Token(LABEL, yytext, yylineno);
+                return LABEL;
+            }
 
 return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN, lineno is %d\n", yylineno);
                 return RETURN;
@@ -42,8 +43,9 @@ return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN, 
 
     /*函数关键字*/
 {fname}    {   if(Debug_Lex)   printf("Recognized function name, lineno is %d\n", yylineno);
-                    return FNAME;
-                }
+                yylval.kToken = new Token(FNAME, yytext, yylineno);
+                return FNAME;
+            }
 
 call    {   if(Debug_Lex)   printf("Recognized function call, lineno is %d\n", yylineno);
             return CALL;
@@ -99,15 +101,15 @@ end   {   if(Debug_Lex)   printf("Recognized function end, lineno is %d\n", yyli
             }
 
     /*常量*/
-{number}    {   int num = int(strtol(yytext, nullptr, 10));
+{number}|-{number}    {   int num = int(strtol(yytext, nullptr, 10));
                 if(Debug_Lex)   printf("Recognized Literal %d, lineno is %d\n", num, yylineno);
                 yylval.kToken = new Token (NUM, num, yylineno);
                 return NUM;
             }
 
 
-"//".*$     {  if(Debug_Lex)    printf("Comments, Ignored!");}
-"/*"[^"*"]*(\*+[^"*/"][^"*"]*)*\*+"/"  { if(Debug_Lex)    printf("Comments, Ignored!");}
+"//".*$     {  if(Debug_Lex)    printf("Comments, Ignored!\n");}
+"/*"[^"*"]*(\*+[^"*/"][^"*"]*)*\*+"/"  { if(Debug_Lex)    printf("Comments, Ignored!\n");}
 
     /*其它情况直接返回*/
 .           {   if(Debug_Lex)    printf("Other Cases: %s, lineno is %d\n", yytext, yylineno);

@@ -9,26 +9,41 @@
 
 using namespace std;
 
-#define Debug_Lex 1
-#define Debug_Parser 1
-#define Debug_Ir 1
+#define Debug_Lex 0
+#define Debug_Parser 0
+#define Debug_Ir 0
 
+extern vector<string>code_list;
+extern vector<string>init_list;
+extern vector<int>var_list;
+extern map<string, int> stack_map;
+extern map<string, string>global_map;
+extern int stack_idx;
+extern int stack_size;
+extern int param_cnt;
+
+int get_next_var();
 
 class Token{
     public:
         int token_type;
-        int val;
-        string ident_name;
-        int line_no;
+        int val = 0;
+        string name = "";
+        string ir_addr = "";
+        string reg = "";
+        int line_no = 0;
 
+        Token(){
+            ;
+        }
         Token(int token_type_, int val_, int line_no_){
             token_type = token_type_;
             val = val_;
             line_no = line_no_;
         }
-        Token(int token_type_, const string & ident_name_, int line_no_){
+        Token(int token_type_, const string & name_, int line_no_){
             token_type = token_type_;
-            ident_name = ident_name_;
+            name = name_;
             line_no = line_no_;
         }
 };
