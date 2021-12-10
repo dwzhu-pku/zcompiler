@@ -19,8 +19,8 @@ int main(int argc, char **argv){
     char opt;
     char *input_path = nullptr;
     char *output_path = nullptr;
-    while( (opt = getopt(argc, argv, "e:o:S")) != -1 ){
-            if(opt == 'e'){
+    while( (opt = getopt(argc, argv, "t:o:S")) != -1 ){
+            if(opt == 't'){
                 input_path = optarg;
             }
             if(opt == 'o'){

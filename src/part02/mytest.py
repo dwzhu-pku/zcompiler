@@ -2,7 +2,7 @@ import os
 from types import coroutine
 
 PATH = "./part2_opentest/functional"
-COMP_COMMAND = "./build/compiler -S -e {0}/{1}.eeyore -o {0}/{1}.tigger"
+COMP_COMMAND = "./build/compiler -S -t {0}/{1}.eeyore -o {0}/{1}.tigger"
 MINIVM_COMMAND = "../MiniVM/build/minivm -t {0}/{1}.tigger > {0}/{1}.myout"
 MINIVM_COMMAND_V2 = "../MiniVM/build/minivm -t {0}/{1}.tigger < {0}/{1}.in > {0}/{1}.myout"
 APPEND_COMMAND = " sed -i '$a\\' {0}/{1}.myout && echo {2} >> {0}/{1}.myout"
