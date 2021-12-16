@@ -91,7 +91,7 @@ FunDef          : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
                         code_list.push_back(func_name + ":");
                         stk = ((($6)->val)/4 + 1) * 16;
                         code_list.push_back("\taddi\tsp, sp, -" + to_string(stk));
-                        code_list.push_back("\tsw\tra, " + to_string(stk) + "-4(sp)");
+                        code_list.push_back("\tsw\tra, " + to_string(stk-4) + "(sp)");
                     }
                 ;
 
@@ -247,7 +247,7 @@ CallFunc        : CALL FNAME
 ReturnStmt      : RETURN
                     {
                         if (Debug_Parser)   printf("Trace: ReturnStmt\n");
-                        code_list.push_back("\tlw\tra, " + to_string(stk) + "-4(sp)");
+                        code_list.push_back("\tlw\tra, " + to_string(stk-4) + "(sp)");
                         code_list.push_back("\taddi\tsp, sp, " + to_string(stk));
                         code_list.push_back("ret");
                     }
