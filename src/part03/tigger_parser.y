@@ -150,8 +150,8 @@ RegOpInt      : REG ASSIGN REG Op NUM
                     {
                         // 需要分类讨论num的大小，以此使用不同的指令
                         if (Debug_Parser)   printf("Trace: RegOpInt\n");
-                        int num = ($3)->val;
-                        string op = ($2)->name;
+                        int num = ($5)->val;
+                        string op = ($4)->name;
                         code_list.push_back("li s0, " + to_string(num));
                         genBinOp(($1)->name, ($3)->name, "s0", op);
                     }
