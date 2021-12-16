@@ -72,7 +72,7 @@
 ProgramArr      : Program ProgramArr
                 | Program
                 ;
-                
+
 Program         : FunDef | EndFunDef | GlobalDeclare | GlobalArray | RegInt | RegOpReg | RegOpInt | RegUnOpReg | RegAssignReg
                 | ArrayWrite | ArrayRead | IfStmt | GotoLabel | LabelDef | CallFunc | ReturnStmt | StoreRegInt
                 | LoadIntReg | LoadVarReg | LoadaddrIntReg | LoadaddrVarReg
@@ -84,7 +84,6 @@ FunDef          : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
                     {
                         if (Debug_Parser)   printf("Trace: FunDef\n");
                         string func_name = (($1)->name).substr(2);
-                        cout<<func_name<<endl;
                         code_list.push_back("\t.text");
                         code_list.push_back("\t.align\t2");
                         code_list.push_back("\t.global\t" + func_name);
