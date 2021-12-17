@@ -90,8 +90,18 @@ FunDef          : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
                         code_list.push_back("\t.type\t" + func_name + ", @function");
                         code_list.push_back(func_name + ":");
                         stk = ((($6)->val)/4 + 1) * 16;
-                        code_list.push_back("\taddi\tsp, sp, -" + to_string(stk));
-                        code_list.push_back("\tsw\tra, " + to_string(stk-4) + "(sp)");
+
+                        if (-stk >= -2048 && -stk <= 2047){
+                            code_list.push_back("\taddi\tsp, sp, -" + to_string(stk));
+                            code_list.push_back("\tsw\tra, " + to_string(stk-4) + "(sp)");
+                        } else{
+                            code_list.push_back("li s0, " + to_string(-stk));
+                            code_list.push_back("add sp, sp, s0");
+                            code_list.push_back("li s0, " + to_string(stk-4));
+                            code_list.push_back("add s0, sp, s0");
+                            code_list.push_back("\tsw\tra, 0(s0)");
+                        }
+
                     }
                 ;
 
@@ -247,8 +257,17 @@ CallFunc        : CALL FNAME
 ReturnStmt      : RETURN
                     {
                         if (Debug_Parser)   printf("Trace: ReturnStmt\n");
-                        code_list.push_back("\tlw\tra, " + to_string(stk-4) + "(sp)");
-                        code_list.push_back("\taddi\tsp, sp, " + to_string(stk));
+
+                        if (stk >= -2048 && stk <= 2047){
+                            code_list.push_back("\tlw\tra, " + to_string(stk-4) + "(sp)");
+                            code_list.push_back("\taddi\tsp, sp, " + to_string(stk));
+                        } else{
+                            code_list.push_back("li s0, " + to_string(stk-4));
+                            code_list.push_back("add s0, sp, s0");
+                            code_list.push_back("\tlw\tra, 0(s0)");
+                            code_list.push_back("li s0, " + to_string(stk));
+                            code_list.push_back("add sp, sp, s0");
+                        }
                         code_list.push_back("ret");
                     }
                 ;
@@ -257,7 +276,15 @@ StoreRegInt     : STORE REG NUM
                     {
                         if (Debug_Parser)   printf("Trace: StoreRegInt\n");
                         int num = 4 * ($3)->val;
-                        code_list.push_back("sw " + ($2)->name + ", " + to_string(num) + "(sp)");
+
+                        if (num >= -2048 && stk <= 2047){
+                            code_list.push_back("sw " + ($2)->name + ", " + to_string(num) + "(sp)");
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            code_list.push_back("add s0, sp, s0");
+                            code_list.push_back("sw " + ($2)->name + ", 0(s0)");
+                        }
+
                     }
                 ;
 
@@ -265,7 +292,15 @@ LoadIntReg      : LOAD NUM REG
                     {
                         if (Debug_Parser)   printf("Trace: LoadIntReg\n");
                         int num = 4 * ($2)->val;
-                        code_list.push_back("lw " + ($3)->name + ", " + to_string(num) + "(sp)");
+
+                        if (num >= -2048 && stk <= 2047){
+                            code_list.push_back("lw " + ($3)->name + ", " + to_string(num) + "(sp)");
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            code_list.push_back("add s0, sp, s0");
+                            code_list.push_back("lw " + ($3)->name + ", 0(s0)");
+                        }
+
                     }
                 ;
 
@@ -284,7 +319,12 @@ LoadaddrIntReg  : LOADADDR NUM REG
                         if (Debug_Parser)   printf("Trace: LoadaddrIntReg\n");
                         int num = 4 * ($2)->val;
                         string reg = ($3)->name;
-                        code_list.push_back("addi " + reg + ", sp, " + to_string(num));
+                        if (num >= -2048 && num <= 2047){
+                            code_list.push_back("addi " + reg + ", sp, " + to_string(num));
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            code_list.push_back("add " + reg + ", sp, s0");
+                        }
                     }
                 ;
 

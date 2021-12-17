@@ -3,8 +3,9 @@ from types import coroutine
 
 PATH = "./part3_opentest/functional"
 COMP_COMMAND = "./build/compiler -S {0}/{1}.tigger -o {0}/{1}.S"
-MINIVM_COMMAND = "../MiniVM/build/minivm -t {0}/{1}.tigger > {0}/{1}.myout"
-MINIVM_COMMAND_V2 = "../MiniVM/build/minivm -t {0}/{1}.tigger < {0}/{1}.in > {0}/{1}.myout"
+RISCV_COMMAND1 = "riscv32-unknown-linux-gnu-gcc {0}/{1}.S -o output.o -L/root -lsysy -static"
+RISCV_COMMAND2_V1 = "qemu-riscv32-static output.o > {0}/{1}.myout"
+RISCV_COMMAND2_V2 = "qemu-riscv32-static output.o < {0}/{1}.in > {0}/{1}.myout"
 APPEND_COMMAND = " sed -i '$a\\' {0}/{1}.myout && echo {2} >> {0}/{1}.myout"
 
 def out_compare(prefix):
@@ -29,27 +30,31 @@ correct_cnt = 0
 for idx, file in enumerate(file_list):
     prefix = file[:-7]
 
-    if prefix != "00_arr_defn2":
+    if prefix != "99_register_realloc":
         continue
     try:
         res1 = os.system(COMP_COMMAND.format(PATH, prefix))
         if res1 != 0:
             print(f"Case {idx} ignored")
             continue
+        tmp = os.system(RISCV_COMMAND1.format(PATH, prefix))
+        if tmp != 0:
+            print(f"Case {idx} ignored")
+            continue
+        
+        res2 = 0
+        if(f"{prefix}.in" in os.listdir(f"{PATH}")):
+            res2 = os.system(RISCV_COMMAND2_V2.format(PATH, prefix))
+        else:
+            res2 = os.system(RISCV_COMMAND2_V1.format(PATH, prefix))
 
-        # res2 = 0
-        # if(f"{prefix}.in" in os.listdir(f"{PATH}")):
-        #     res2 = os.system(MINIVM_COMMAND_V2.format(PATH, prefix))
-        # else:
-        #     res2 = os.system(MINIVM_COMMAND.format(PATH, prefix))
+        os.system(APPEND_COMMAND.format(PATH, prefix, str(int(res2//256))))
 
-        # os.system(APPEND_COMMAND.format(PATH, prefix, str(int(res2//256))))
-
-        # if out_compare(prefix) is False:
-        #     print(f"Case {prefix} failed!")
-        # else:
-        #     correct_cnt += 1
-        #     print(f"Case {prefix} passed!")
+        if out_compare(prefix) is False:
+            print(f"Case {prefix} failed!")
+        else:
+            correct_cnt += 1
+            print(f"Case {prefix} passed!")
 
     except:
         continue
