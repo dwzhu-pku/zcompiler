@@ -197,7 +197,7 @@ ArrayWrite      : REG LKHZ NUM RKHZ ASSIGN REG
                         if (Debug_Parser)   printf("Trace: ArrayWrite\n");
                         int num = ($3)->val;
 
-                        if (num >= -2048 && stk <= 2047){
+                        if (num >= -2048 && num <= 2047){
                             code_list.push_back("sw " + ($6)->name + ", " + to_string(num) + "(" + ($1)->name + ")");
                         } else{
                             code_list.push_back("li s0, " + to_string(num));
@@ -212,7 +212,7 @@ ArrayRead       : REG ASSIGN REG LKHZ NUM RKHZ
                     {
                         if (Debug_Parser)   printf("Trace: ArrayRead\n");
                         int num = ($5)->val;
-                        if (num >= -2048 && stk <= 2047){
+                        if (num >= -2048 && num <= 2047){
                             code_list.push_back("lw " + ($1)->name + ", " + to_string(num) + "(" + ($3)->name + ")");
                         } else{
                             code_list.push_back("li s0, " + to_string(num));
