@@ -45,6 +45,7 @@
             code_list.push_back("seqz "+ reg1 + ", " + reg1);
         } else{
             printf("Error! Unexpected case\n");
+            exit(-1);
         }
     }
 
@@ -177,6 +178,9 @@ RegUnOpReg      : REG ASSIGN Op REG
                             code_list.push_back("neg " + reg1 + ", " + reg2);
                         } else if (op == "!"){
                             code_list.push_back("seqz " + reg1 + ", " + reg2);
+                        } else{
+                            printf("Error! Unexpected Operator!\n");
+                            exit(-1);
                         }
                     }
                 ;
@@ -225,6 +229,7 @@ IfStmt          : IF REG Op REG GOTO LABEL
                             code_list.push_back("beq " + reg1 + ", " + reg2 + ", " + label);
                         } else {
                             printf("Error! Unexpected Operator!\n");
+                            exit(-1);
                         }
                     }
                 ;
