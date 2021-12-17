@@ -164,9 +164,9 @@ RegOpInt      : REG ASSIGN REG Op NUM
                         int num = ($5)->val;
                         string op = ($4)->name;
                         if (num >= -2048 && num <= 2047 && op == "+"){
-                            code_list.push_back("addi "+ reg1 + ", " + reg2 + ", " + to_string(num));
+                            code_list.push_back("addi "+ ($1)->name + ", " + ($3)->name + ", " + to_string(num));
                         } else if (num >= -2048 && num <= 2047 && op == "<"){
-                            code_list.push_back("slti "+ reg1 + ", " + reg2 + ", " + to_string(num));
+                            code_list.push_back("slti "+ ($1)->name + ", " + ($3)->name + ", " + to_string(num));
                         } else{
                             code_list.push_back("li s0, " + to_string(num));
                             genBinOp(($1)->name, ($3)->name, "s0", op);
