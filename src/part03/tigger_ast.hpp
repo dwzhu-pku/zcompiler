@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define Debug_Lex 1
+#define Debug_Lex 0
 #define Debug_Parser 0
 #define Debug_Ir 0
 

@@ -30,8 +30,8 @@ correct_cnt = 0
 for idx, file in enumerate(file_list):
     prefix = file[:-7]
 
-    if prefix != "99_register_realloc":
-        continue
+    # if prefix != "99_register_realloc":
+    #     continue
     try:
         res1 = os.system(COMP_COMMAND.format(PATH, prefix))
         if res1 != 0:
