@@ -196,7 +196,15 @@ ArrayWrite      : REG LKHZ NUM RKHZ ASSIGN REG
                     {
                         if (Debug_Parser)   printf("Trace: ArrayWrite\n");
                         int num = ($3)->val;
-                        code_list.push_back("sw " + ($6)->name + ", " + to_string(num) + "(" + ($1)->name + ")");
+
+                        if (num >= -2048 && stk <= 2047){
+                            code_list.push_back("sw " + ($6)->name + ", " + to_string(num) + "(" + ($1)->name + ")");
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            code_list.push_back("add s0, s0, " + ($1)->name);
+                            code_list.push_back("sw " + ($6)->name + ", 0(s0)");
+                        }
+
                     }
                 ;
 
@@ -204,7 +212,13 @@ ArrayRead       : REG ASSIGN REG LKHZ NUM RKHZ
                     {
                         if (Debug_Parser)   printf("Trace: ArrayRead\n");
                         int num = ($5)->val;
-                        code_list.push_back("lw " + ($1)->name + ", " + to_string(num) + "(" + ($3)->name + ")");
+                        if (num >= -2048 && stk <= 2047){
+                            code_list.push_back("lw " + ($1)->name + ", " + to_string(num) + "(" + ($3)->name + ")");
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            code_list.push_back("add s0, s0, " + ($3)->name);
+                            code_list.push_back("lw " + ($1)->name + ", 0(s0)");
+                        }
                     }
                 ;
 
