@@ -163,8 +163,14 @@ RegOpInt      : REG ASSIGN REG Op NUM
                         if (Debug_Parser)   printf("Trace: RegOpInt\n");
                         int num = ($5)->val;
                         string op = ($4)->name;
-                        code_list.push_back("li s0, " + to_string(num));
-                        genBinOp(($1)->name, ($3)->name, "s0", op);
+                        if (num >= -2048 && num <= 2047 && op == "+"){
+                            code_list.push_back("addi "+ reg1 + ", " + reg2 + ", " + to_string(num));
+                        } else if (num >= -2048 && num <= 2047 && op == "<"){
+                            code_list.push_back("slti "+ reg1 + ", " + reg2 + ", " + to_string(num));
+                        } else{
+                            code_list.push_back("li s0, " + to_string(num));
+                            genBinOp(($1)->name, ($3)->name, "s0", op);
+                        }
                     }
                 ;
 
