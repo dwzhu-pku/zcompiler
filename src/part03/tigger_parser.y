@@ -308,7 +308,7 @@ StoreRegInt     : STORE REG NUM
                         if (Debug_Parser)   printf("Trace: StoreRegInt\n");
                         int num = 4 * ($3)->val;
 
-                        if (num >= -2048 && stk <= 2047){
+                        if (num >= -2048 && num <= 2047){
                             code_list.push_back("sw " + ($2)->name + ", " + to_string(num) + "(sp)");
                         } else{
                             code_list.push_back("li s0, " + to_string(num));
@@ -324,7 +324,7 @@ LoadIntReg      : LOAD NUM REG
                         if (Debug_Parser)   printf("Trace: LoadIntReg\n");
                         int num = 4 * ($2)->val;
 
-                        if (num >= -2048 && stk <= 2047){
+                        if (num >= -2048 && num <= 2047){
                             code_list.push_back("lw " + ($3)->name + ", " + to_string(num) + "(sp)");
                         } else{
                             code_list.push_back("li s0, " + to_string(num));
