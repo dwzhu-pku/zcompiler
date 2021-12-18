@@ -5,7 +5,7 @@
     extern int t2r_yylineno;
     extern FILE * t2r_yyin;
     extern FILE * t2r_yyout;
-    void t2r_yyerror(const char *);
+    void t2r_yyerror(const char *s);
 
     void genBinOp(string reg1, string reg2, string reg3, string op){
         if (op == "+"){
@@ -65,15 +65,19 @@
 %type <kToken> Program GlobalVarDecl FunctionDef FunctionHeader Expressions FunctionEnd Expression
 
 %%
-Program         : GlobalVarDecl Program
+Program         : GlobalVarDecl
                     {
                         if (T2R_Debug_Parser)   printf("Trace: Program\n");
                     }
-                | FunctionDef Program
+                | FunctionDef
                     {
                         if (T2R_Debug_Parser)   printf("Trace: Program\n");
                     }
-                |
+                | Program GlobalVarDecl
+                    {
+                        if (T2R_Debug_Parser)   printf("Trace: Program\n");
+                    }
+                | Program FunctionDef
                     {
                         if (T2R_Debug_Parser)   printf("Trace: Program\n");
                     }
@@ -101,7 +105,11 @@ GlobalVarDecl   : VAR ASSIGN NUM
                     }
                 ;
 
-FunctionDef     : FunctionHeader Expressions FunctionEnd
+FunctionDef     : FunctionHeader FunctionEnd
+                    {
+                        if (T2R_Debug_Parser)   printf("Trace: FunctionDef\n");
+                    }
+                | FunctionHeader Expressions FunctionEnd
                     {
                         if (T2R_Debug_Parser)   printf("Trace: FunctionDef\n");
                     }
@@ -132,8 +140,8 @@ FunctionHeader  : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
                     }
                 ;
 
-Expressions     : Expression Expressions
-                |
+Expressions     : Expression
+                | Expressions Expression
                     {
                         if (T2R_Debug_Parser)   printf("Trace: Expressions\n");
                     }
@@ -344,8 +352,8 @@ Expression      : REG ASSIGN REG Op REG
 
 %%
 
-void t2r_yyerror(const char *){
-    printf("Tigger Syntax error at line %d. \n", t2r_yylineno);
+void t2r_yyerror(const char *s){
+    printf("Tigger Syntax error at line %d, error is %s. \n", t2r_yylineno, s);
 };
 
 int t2r_yywrap(void){
