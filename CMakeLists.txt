@@ -14,8 +14,8 @@ find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
 # generate lexer/parser
-file(GLOB_RECURSE L_SOURCES "src/part03/*.l")
-file(GLOB_RECURSE Y_SOURCES "src/part03/*.y")
+file(GLOB_RECURSE L_SOURCES "src/part02/*.l")
+file(GLOB_RECURSE Y_SOURCES "src/part02/*.y")
 if(NOT (L_SOURCES STREQUAL "" AND Y_SOURCES STREQUAL ""))
   string(REGEX REPLACE ".*/(.*)\\.l" "${CMAKE_CURRENT_BINARY_DIR}/\\1.lex.cpp" L_OUTPUTS "${L_SOURCES}")
   string(REGEX REPLACE ".*/(.*)\\.y" "${CMAKE_CURRENT_BINARY_DIR}/\\1.tab.cpp" Y_OUTPUTS "${Y_SOURCES}")
@@ -24,14 +24,15 @@ if(NOT (L_SOURCES STREQUAL "" AND Y_SOURCES STREQUAL ""))
   add_flex_bison_dependency(Lexer Parser)
 endif()
 
+
 # project include directories
-include_directories(src/part03)
+include_directories(src/part02)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # all of C/C++ source files
-file(GLOB_RECURSE C_SOURCES "src/part03/*.c")
-file(GLOB_RECURSE CXX_SOURCES "src/part03/*.cpp")
-file(GLOB_RECURSE CC_SOURCES "src/part03/*.cc")
+file(GLOB_RECURSE C_SOURCES "src/part02/*.c")
+file(GLOB_RECURSE CXX_SOURCES "src/part02/*.cpp")
+file(GLOB_RECURSE CC_SOURCES "src/part02/*.cc")
 set(SOURCES ${C_SOURCES} ${CXX_SOURCES} ${CC_SOURCES}
             ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 
