@@ -391,7 +391,9 @@ void ListAst::genCode(){
         SymItem* ptr = new SymItem(name, addr, 1, 0, offset_vec);
         (*cur)[name]=ptr;
         /* 数组初始化 */
-        set_init_val(list_inits, 0, 0);
+        if(list_inits.size() > 0){
+            set_init_val(list_inits, 0, 0);
+        }
     }
 }
 
@@ -435,7 +437,7 @@ int BinaryOpAst::calVal(){
         }else if (op == "*"){
             return tmp1 * tmp2;
         }else if (op == "/"){
-            return tmp1 * tmp2;
+            return tmp1 / tmp2;
         }else if (op == "%"){
             return tmp1 % tmp2;
         }else{

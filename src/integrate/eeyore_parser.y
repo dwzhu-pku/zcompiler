@@ -5,7 +5,7 @@
     extern int e2t_yylineno;
     extern FILE * e2t_yyin;
     extern FILE * e2t_yyout;
-    void e2t_yyerror(const char *);
+    void e2t_yyerror(const char *s);
     
 %}
 %define api.prefix {e2t_yy}
@@ -365,8 +365,8 @@ RightValue      : SYMBOL
 
 %%
 
-void e2t_yyerror(const char *){
-    printf("Syntax error at line %d. \n", e2t_yylineno);
+void e2t_yyerror(const char *s){
+    printf("Eeyore Syntax error at line %d, error is %s. \n", e2t_yylineno, s);
 };
 
 int e2t_yywrap(void){

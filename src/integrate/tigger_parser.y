@@ -345,7 +345,7 @@ Expression      : REG ASSIGN REG Op REG
 %%
 
 void t2r_yyerror(const char *){
-    printf("Syntax error at line %d. \n", t2r_yylineno);
+    printf("Tigger Syntax error at line %d. \n", t2r_yylineno);
 };
 
 int t2r_yywrap(void){

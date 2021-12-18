@@ -583,7 +583,7 @@ RelExp          : AddExp
 %%
 
 void yyerror(BaseAst**, const char *){
-    printf("Syntax error at line %d. \n", yylineno);
+    printf("Sysy Syntax error at line %d. \n", yylineno);
 };
 
 int yywrap(void){

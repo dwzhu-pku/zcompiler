@@ -30,7 +30,7 @@ correct_cnt = 0
 for idx, file in enumerate(file_list):
     prefix = file[:-3]
 
-    # if prefix != "000_main":
+    # if prefix != "104_long_array":
     #     continue
     try:
         res1 = os.system(COMP_COMMAND.format(PATH, prefix))
