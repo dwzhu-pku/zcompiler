@@ -8,7 +8,7 @@
 extern FILE * yyin;
 extern FILE * yyout;
 
-int main(int argc, char **argv){
+int eeyore2tigger(int argc, char **argv){
 
     if (argc < 2) {
         cout<<"Parameter Error!"<<endl;
@@ -44,9 +44,10 @@ int main(int argc, char **argv){
     ofstream new_cout(output_path);
     cout.rdbuf(new_cout.rdbuf());
 
-    yyparse();
+    BaseAst* root;
+    yyparse(&root);
 
-    for(string line: e2t_code_list){
+    for(string line: code_list){
         if(line.size() >= 6 && line.compare(0,6,"f_main") == 0){
             cout<<line<<endl;
             for (string i: init_list){

@@ -33,7 +33,7 @@ goto    {   if(Debug_Lex)   printf("Recognized control flow keyword GOTO, lineno
         }
 
 {label}    {   if(Debug_Lex)   printf("Recognized control flow keyword LABEL, lineno is %d\n", yylineno);
-                yylval.kToken = new E2T_Token(LABEL, yytext, yylineno);
+                yylval.kToken = new Token(LABEL, yytext, yylineno);
                 return LABEL;
             }
 
@@ -43,7 +43,7 @@ return      {   if(Debug_Lex)   printf("Recognized control flow keyword RETURN, 
 
     /*函数关键字*/
 {fname}    {   if(Debug_Lex)   printf("Recognized function name, lineno is %d\n", yylineno);
-                yylval.kToken = new E2T_Token(FNAME, yytext, yylineno);
+                yylval.kToken = new Token(FNAME, yytext, yylineno);
                 return FNAME;
             }
 
@@ -63,7 +63,7 @@ end   {   if(Debug_Lex)   printf("Recognized function end, lineno is %d\n", yyli
 
 "+"|"-"|"*"|"/"|"%"|"!"|"&&"|"||"|"<"|"<="|">"|">="|"=="|"!="     {
            if(Debug_Lex)   printf("Recognized Operator %s, lineno is %d\n", yytext, yylineno);
-            yylval.kToken = new E2T_Token(Op, yytext, yylineno);
+            yylval.kToken = new Token(Op, yytext, yylineno);
             return Op;
         }
 
@@ -86,24 +86,24 @@ end   {   if(Debug_Lex)   printf("Recognized function end, lineno is %d\n", yyli
 
     /*标识符*/
 {var_T}    {    if(Debug_Lex)   printf("Recognized Identity %s, lineno is %d\n", yytext, yylineno);
-                yylval.kToken = new E2T_Token (SYMBOL, yytext, yylineno);
+                yylval.kToken = new Token (SYMBOL, yytext, yylineno);
                 return SYMBOL;
             }
 
 {var_t}    {    if(Debug_Lex)   printf("Recognized Identity %s, lineno is %d\n", yytext, yylineno);
-                yylval.kToken = new E2T_Token (SYMBOL, yytext, yylineno);
+                yylval.kToken = new Token (SYMBOL, yytext, yylineno);
                 return SYMBOL;
             }
 
 {var_p}    {    if(Debug_Lex)   printf("Recognized Identity %s, lineno is %d\n", yytext, yylineno);
-                yylval.kToken = new E2T_Token (SYMBOL, yytext, yylineno);
+                yylval.kToken = new Token (SYMBOL, yytext, yylineno);
                 return SYMBOL;
             }
 
     /*常量*/
 {number}|-{number}    {   int num = int(strtol(yytext, nullptr, 10));
                 if(Debug_Lex)   printf("Recognized Literal %d, lineno is %d\n", num, yylineno);
-                yylval.kToken = new E2T_Token (NUM, num, yylineno);
+                yylval.kToken = new Token (NUM, num, yylineno);
                 return NUM;
             }
 
