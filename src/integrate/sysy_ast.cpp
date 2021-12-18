@@ -132,7 +132,7 @@ void LvalAst::genCode(){
         return;
     }
     addr = item->second->ir_name;
-    vector<int>offset_vec = item->second->offset_vec;
+    vector<long long>offset_vec = item->second->offset_vec;
     
     /*此时，该引用为数组*/
     if (offset_vec.size() > 0){
@@ -407,9 +407,9 @@ int LvalAst::calVal(){
         return 0;
     }
     if (list_dims.size() > 0){ // 数组
-        int tmp_ofs = 0;
+        long long tmp_ofs = 0;
         for(int i = 0; i < int(list_dims.size()); ++i){
-            int tmp_dim = list_dims[i]->calVal();
+            long long tmp_dim = list_dims[i]->calVal();
             tmp_ofs += tmp_dim * item->second->offset_vec[i+1];
         }
         return item->second->init_val_list[tmp_ofs];
@@ -435,7 +435,7 @@ int BinaryOpAst::calVal(){
         }else if (op == "*"){
             return tmp1 * tmp2;
         }else if (op == "/"){
-            return tmp1 * tmp2;
+            return tmp1 / tmp2;
         }else if (op == "%"){
             return tmp1 % tmp2;
         }else{

@@ -1,8 +1,8 @@
 import os
 from types import coroutine
 
-PATH = "./part3_opentest/functional"
-COMP_COMMAND = "./build/compiler -S {0}/{1}.tigger -o {0}/{1}.S"
+PATH = "./all_opentest/function_test2021"
+COMP_COMMAND = "./build/compiler -S {0}/{1}.sy -o {0}/{1}.S"
 RISCV_COMMAND1 = "riscv32-unknown-linux-gnu-gcc {0}/{1}.S -o output.o -L/root -lsysy -static"
 RISCV_COMMAND2_V1 = "qemu-riscv32-static output.o > {0}/{1}.myout"
 RISCV_COMMAND2_V2 = "qemu-riscv32-static output.o < {0}/{1}.in > {0}/{1}.myout"
@@ -24,13 +24,13 @@ def out_compare(prefix):
     return True
 
 
-file_list = [ file for file in os.listdir(f"{PATH}") if  file.endswith("tigger")  ]
+file_list = [ file for file in os.listdir(f"{PATH}") if  file.endswith("sy")  ]
 correct_cnt = 0
 
 for idx, file in enumerate(file_list):
-    prefix = file[:-7]
+    prefix = file[:-3]
 
-    # if prefix != "91_line_search":
+    # if prefix != "000_main":
     #     continue
     try:
         res1 = os.system(COMP_COMMAND.format(PATH, prefix))

@@ -15,7 +15,7 @@ class SymItem{
         int ident_type; // 0: void; 1: int; 2: const
         int is_fun;
         vector<int> init_val_list;
-        vector<int> offset_vec;
+        vector<long long> offset_vec;
 
         SymItem(string ident_name_, string ir_name_, int ident_type_, int is_fun_){
             ident_name = ident_name_;
@@ -24,7 +24,7 @@ class SymItem{
             is_fun = is_fun_;
         }
 
-        SymItem(string ident_name_, string ir_name_, int ident_type_, int is_fun_, vector<int>& offset_vec_){
+        SymItem(string ident_name_, string ir_name_, int ident_type_, int is_fun_, vector<long long>& offset_vec_){
             ident_name = ident_name_;
             ir_name = ir_name_;
             ident_type = ident_type_;

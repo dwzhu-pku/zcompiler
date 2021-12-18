@@ -5,9 +5,8 @@
 #include<algorithm>
 #include"tigger_ast.hpp"
 #include"tigger_parser.tab.hpp"
-extern FILE * yyin;
-extern FILE * yyout;
-extern int yylex();
+extern FILE * t2r_yyin;
+extern FILE * t2r_yyout;
 
 int main(int argc, char **argv){
 
@@ -30,24 +29,24 @@ int main(int argc, char **argv){
 
     FILE* input = fopen(input_path, "r");
     if(input == nullptr){
-        cout<<"Error, no input file!"<<endl;
+        cout<<"Error, open input file failed!"<<endl;
         return 1;
     } 
     FILE* output = fopen(output_path, "w");
     if(output == nullptr){
-        cout<<"Error, no output file!"<<endl;
+        cout<<"Error, open output file failed!"<<endl;
         return 1;
     }
-    yyin = input;
-    yyout = output;
+    t2r_yyin = input;
+    t2r_yyout = output;
 
     streambuf* bak_cout = cout.rdbuf();
     ofstream new_cout(output_path);
     cout.rdbuf(new_cout.rdbuf());
 
-    yyparse();
+    t2r_yyparse();
 
-    for(string line: code_list){
+    for(string line: t2r_code_list){
         cout << line << endl;
     }
 

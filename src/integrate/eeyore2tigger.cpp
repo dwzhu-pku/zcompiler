@@ -5,49 +5,29 @@
 #include<algorithm>
 #include"eeyore_ast.hpp"
 #include"eeyore_parser.tab.hpp"
-extern FILE * yyin;
-extern FILE * yyout;
+extern FILE * e2t_yyin;
+extern FILE * e2t_yyout;
 
-int eeyore2tigger(int argc, char **argv){
+int eeyore2tigger(FILE * f_yyin, FILE* f_yyout, char* output_path){
 
-    if (argc < 2) {
-        cout<<"Parameter Error!"<<endl;
-        return 1;
-    }
-
-    char opt;
-    char *input_path = nullptr;
-    char *output_path = nullptr;
-    while( (opt = getopt(argc, argv, "t:o:S")) != -1 ){
-            if(opt == 't'){
-                input_path = optarg;
-            }
-            if(opt == 'o'){
-                output_path = optarg;
-            }
-    }
-
-    FILE* input = fopen(input_path, "r");
-    if(input == nullptr){
+    if(f_yyin == nullptr){
         cout<<"Error, no input file!"<<endl;
         return 1;
     } 
-    FILE* output = fopen(output_path, "w");
-    if(output == nullptr){
+    if(f_yyout == nullptr){
         cout<<"Error, no output file!"<<endl;
         return 1;
     }
-    yyin = input;
-    yyout = output;
+    e2t_yyin = f_yyin;
+    e2t_yyout = f_yyout;
 
     streambuf* bak_cout = cout.rdbuf();
-    ofstream new_cout(output_path);
+    ofstream new_cout("output.tigger");
     cout.rdbuf(new_cout.rdbuf());
 
-    BaseAst* root;
-    yyparse(&root);
+    e2t_yyparse();
 
-    for(string line: code_list){
+    for(string line: e2t_code_list){
         if(line.size() >= 6 && line.compare(0,6,"f_main") == 0){
             cout<<line<<endl;
             for (string i: init_list){
@@ -60,8 +40,8 @@ int eeyore2tigger(int argc, char **argv){
 
     //恢复cout重定向
     cout.rdbuf(bak_cout);
-    fclose(input);
-    fclose(output);
+    fclose(f_yyin);
+    fclose(f_yyout);
 
     return 0;
 }

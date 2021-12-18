@@ -331,9 +331,9 @@ class ListAst: public BaseAst{
         vector<BaseAst*> list_dims;
         vector<BaseAst*> list_inits;
         vector<int> dim_vec;
-        vector<int> offset_vec;
+        vector<long long> offset_vec;
         vector<int> init_val_vec;
-        int list_size = 0;
+        long long list_size = 0;
         void genCode();
         
         ListAst(const string & name_ ){
@@ -358,11 +358,11 @@ class ListAst: public BaseAst{
             for (auto i : list_dims){
                 dim_vec.push_back(i->calVal());
             }
-            int sz = 1;
+            long long sz = 1;
             for (int i: dim_vec){
                 sz *= i;
             }
-            int mul = 1;
+            long long mul = 1;
             offset_vec.push_back(sz);
             for (int i: dim_vec){
                 mul = mul * i;
@@ -373,8 +373,8 @@ class ListAst: public BaseAst{
         }
         
 
-        void set_init_val(vector<BaseAst*> & init_vec, int level, int st){
-            int ofs = st;
+        void set_init_val(vector<BaseAst*> & init_vec, int level, long long st){
+            long long ofs = st;
             for(int i=0; i < int(init_vec.size()); ++i){
                 if(init_vec[i]->node_type == AstType::kArray){
                     set_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);
@@ -386,14 +386,14 @@ class ListAst: public BaseAst{
                     ofs += 1;
                 }
             }
-            for(int i = ofs; i < st + offset_vec[level];++i){
+            for(long long i = ofs; i < st + offset_vec[level];++i){
                 string code_line = addr + "[" + to_string(4*i) + "] = 0";
                 code_list.push_back(code_line);
             }
         }
 
-        void get_init_val(vector<BaseAst*> & init_vec, int level, int st){
-            int ofs = st;
+        void get_init_val(vector<BaseAst*> & init_vec, int level, long long st){
+            long long ofs = st;
             for(int i=0; i < int(init_vec.size()); ++i){
                 if(init_vec[i]->node_type == AstType::kArray){
                     get_init_val(dynamic_cast<ArrayAst*>(init_vec[i])->array_list, level+1, ofs);

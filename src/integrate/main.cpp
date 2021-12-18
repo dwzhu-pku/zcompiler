@@ -9,6 +9,9 @@
 extern FILE * yyin;
 extern FILE * yyout;
 
+extern int eeyore2tigger(FILE * f_yyin, FILE* f_yyout, char* output_path);
+extern int tigger2riscv(FILE * f_yyin, FILE* f_yyout, char* output_path);
+
 map<int, string> int2type={
     {0, "Void"},
     {1, "Int"},
@@ -197,40 +200,21 @@ void reorderCode(){
     }
 }
 
-int main(int argc, char **argv){
+int sysy2eeyore(FILE * f_yyin, FILE* f_yyout, char*output_path){
 
-    if (argc < 2) {
-        cout<<"Parameter Error!"<<endl;
-        return 1;
-    }
-
-    char opt;
-    char *input_path = nullptr;
-    char *output_path = nullptr;
-    while( (opt = getopt(argc, argv, "e:o:S")) != -1 ){
-            if(opt == 'e'){
-                input_path = optarg;
-            }
-            if(opt == 'o'){
-                output_path = optarg;
-            }
-    }
-
-    FILE* input = fopen(input_path, "r");
-    if(input == nullptr){
+    if(f_yyin == nullptr){
         cout<<"Error, no input file!"<<endl;
         return 1;
     } 
-    FILE* output = fopen(output_path, "w");
-    if(output == nullptr){
+    if(f_yyout == nullptr){
         cout<<"Error, no output file!"<<endl;
         return 1;
     }
-    yyin = input;
-    yyout = output;
+    yyin = f_yyin;
+    yyout = f_yyout;
 
     streambuf* bak_cout = cout.rdbuf();
-    ofstream new_cout(output_path);
+    ofstream new_cout("output.eeyore");
     cout.rdbuf(new_cout.rdbuf());
 
     getRuntimeFun();
@@ -246,7 +230,82 @@ int main(int argc, char **argv){
 
     //恢复cout重定向
     cout.rdbuf(bak_cout);
-    fclose(input);
-    fclose(output);
+    fclose(f_yyin);
+    fclose(f_yyout);
+
+    return 0;
+}
+
+
+int main(int argc, char **argv){
+
+    if (argc < 2) {
+        cout<<"Parameter Error!"<<endl;
+        return 1;
+    }
+
+    char opt;
+    char *input_path = nullptr;
+    char *output_path = nullptr;
+    while( (opt = getopt(argc, argv, "o:S:")) != -1 ){
+            if(opt == 'S'){
+                input_path = optarg;
+            }
+            if(opt == 'o'){
+                output_path = optarg;
+            }
+    }
+
+    FILE* s2e_in = fopen(input_path, "r");
+    if(s2e_in == nullptr){
+        cout<<"Error, no s2e_in!"<<endl;
+        return 1;
+    } 
+
+    FILE* s2e_out = fopen("output.eeyore", "w");
+    if(s2e_out == nullptr){
+        cout<<"Error, no s2e_out!"<<endl;
+        return 1;
+    } 
+
+    FILE* e2t_in = fopen("output.eeyore", "r");
+    if(e2t_in == nullptr){
+        cout<<"Error, no e2t_in!"<<endl;
+        return 1;
+    } 
+
+    FILE* e2t_out = fopen("output.tigger", "w");
+    if(e2t_out == nullptr){
+        cout<<"Error, no e2t_out!"<<endl;
+        return 1;
+    } 
+
+    FILE* t2r_in = fopen("output.tigger", "r");
+    if(t2r_in == nullptr){
+        cout<<"Error, no t2r_in!"<<endl;
+        return 1;
+    } 
+
+    FILE* t2r_out = fopen(output_path, "w");
+    if(t2r_out == nullptr){
+        cout<<"Error, no t2r_out!"<<endl;
+        return 1;
+    }
+
+    if(sysy2eeyore(s2e_in, s2e_out, output_path)){
+        cout<<"Error in sysy2eeyore"<<endl;
+        return 1;
+    }
+
+    if(eeyore2tigger(e2t_in, e2t_out, output_path)){
+        cout<<"Error in eeyore2tigger"<<endl;
+        return 1;
+    }
+
+    if(tigger2riscv(t2r_in, t2r_out, output_path)){
+        cout<<"Error in tigger2riscv"<<endl;
+        return 1;
+    }
+
     return 0;
 }
