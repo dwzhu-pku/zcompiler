@@ -64,26 +64,54 @@
 %token <kToken> COLON LKHZ RKHZ   // 标点符号
 %token <kToken> MALLOC LOAD LOADADDR STORE  // 其它指令
 
-%type <kToken> Program FunDef EndFunDef GlobalDeclare GlobalArray RegInt
-%type <kToken> RegOpReg RegOpInt RegUnOpReg RegAssignReg ArrayWrite ArrayRead
-%type <kToken> IfStmt GotoLabel LabelDef CallFunc ReturnStmt ProgramArr
-%type <kToken> StoreRegInt LoadIntReg LoadVarReg LoadaddrIntReg LoadaddrVarReg
+%type <kToken> Program GlobalVarDecl FunctionDef FunctionHeader Expressions FunctionEnd Expression
 
 %%
-ProgramArr      : Program ProgramArr
-                | Program
-                ;
-
-Program         : FunDef | EndFunDef | GlobalDeclare | GlobalArray | RegInt | RegOpReg | RegOpInt | RegUnOpReg | RegAssignReg
-                | ArrayWrite | ArrayRead | IfStmt | GotoLabel | LabelDef | CallFunc | ReturnStmt | StoreRegInt
-                | LoadIntReg | LoadVarReg | LoadaddrIntReg | LoadaddrVarReg
-                ;
-
-
-
-FunDef          : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
+Program         : GlobalVarDecl Program
                     {
-                        if (Debug_Parser)   printf("Trace: FunDef\n");
+                        if (Debug_Parser)   printf("Trace: Program\n");
+                    }
+                | FunctionDef Program
+                    {
+                        if (Debug_Parser)   printf("Trace: Program\n");
+                    }
+                |
+                    {
+                        if (Debug_Parser)   printf("Trace: Program\n");
+                    }
+                ;
+
+GlobalVarDecl   : VAR ASSIGN NUM
+                    {
+                        if (Debug_Parser)   printf("Trace: GlobalVarDecl\n");
+                        string var_name = ($1)->name;
+                        int num = ($3)->val;
+                        code_list.push_back("\t.global\t" + var_name);
+                        code_list.push_back("\t.section\t.sdata");
+                        code_list.push_back("\t.align\t2");
+                        code_list.push_back("\t.type\t" + var_name + ", @object");
+                        code_list.push_back("\t.size\t" + var_name + ", 4");
+                        code_list.push_back(var_name + ":");
+                        code_list.push_back("\t.word\t" + to_string(num));
+                    }
+                | VAR ASSIGN MALLOC NUM
+                    {
+                        if (Debug_Parser)   printf("Trace: GlobalVarDecl\n");
+                        string var_name = ($1)->name;
+                        int num = ($3)->val;
+                        code_list.push_back("\t.comm\t" + var_name + ", " + to_string(num) + ", 4");
+                    }
+                ;
+
+FunctionDef     : FunctionHeader Expressions FunctionEnd
+                    {
+                        if (Debug_Parser)   printf("Trace: FunctionDef\n");
+                    }
+                ;
+
+FunctionHeader  : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
+                    {
+                        if (Debug_Parser)   printf("Trace: FunctionHeader\n");
                         string func_name = (($1)->name).substr(2);
                         code_list.push_back("\t.text");
                         code_list.push_back("\t.align\t2");
@@ -106,61 +134,34 @@ FunDef          : FNAME LKHZ NUM RKHZ LKHZ NUM RKHZ
                     }
                 ;
 
-EndFunDef       : END FNAME
+Expressions     : Expression Expressions
+                |
                     {
-                        if (Debug_Parser)   printf("Trace: FunDef\n");
+                        if (Debug_Parser)   printf("Trace: Expressions\n");
+                    }
+                ;
+
+FunctionEnd     : END FNAME
+                    {
+                        if (Debug_Parser)   printf("Trace: FunctionEnd\n");
                         string func_name = (($2)->name).substr(2);
                         code_list.push_back("\t.size\t" + func_name + ", .-" + func_name);
                     }
                 ;
 
-GlobalDeclare   : VAR ASSIGN NUM
+Expression      : REG ASSIGN REG Op REG
                     {
-                        if (Debug_Parser)   printf("Trace: GlobalDeclare\n");
-                        string var_name = ($1)->name;
-                        int num = ($3)->val;
-                        code_list.push_back("\t.global\t" + var_name);
-                        code_list.push_back("\t.section\t.sdata");
-                        code_list.push_back("\t.align\t2");
-                        code_list.push_back("\t.type\t" + var_name + ", @object");
-                        code_list.push_back("\t.size\t" + var_name + ", 4");
-                        code_list.push_back(var_name + ":");
-                        code_list.push_back("\t.word\t" + to_string(num));
-                    }
-                ;
-
-GlobalArray     : VAR ASSIGN MALLOC NUM
-                    {
-                        if (Debug_Parser)   printf("Trace: GlobalArray\n");
-                        string var_name = ($1)->name;
-                        int num = ($3)->val;
-                        code_list.push_back("\t.comm\t" + var_name + ", " + to_string(num) + ", 4");
-                    }
-                ;
-
-RegInt          : REG ASSIGN NUM 
-                    {   
-                        if (Debug_Parser)   printf("Trace: RegInt\n");
-                        code_list.push_back("li " + ($1)->name + ", " + to_string(($3)->val));
-                    }
-                ;
-
-
-RegOpReg        : REG ASSIGN REG Op REG
-                    {
-                        if (Debug_Parser)   printf("Trace: RegOpReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string reg1 = ($1)->name;
                         string reg2 = ($3)->name;
                         string reg3 = ($5)->name;
                         string op = ($4)->name;
                         genBinOp(reg1, reg2, reg3, op);
                     }
-                ;
-
-RegOpInt      : REG ASSIGN REG Op NUM
+                | REG ASSIGN REG Op NUM
                     {
                         // 需要分类讨论num的大小，以此使用不同的指令
-                        if (Debug_Parser)   printf("Trace: RegOpInt\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = ($5)->val;
                         string op = ($4)->name;
                         if (num >= -2048 && num <= 2047 && op == "+"){
@@ -177,11 +178,9 @@ RegOpInt      : REG ASSIGN REG Op NUM
                             genBinOp(($1)->name, ($3)->name, "s0", op);
                         }
                     }
-                ;
-
-RegUnOpReg      : REG ASSIGN Op REG
+                | REG ASSIGN Op REG
                     {
-                        if (Debug_Parser)   printf("Trace: RegUnOpReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string reg1 = ($1)->name;
                         string reg2 = ($4)->name;
                         string op = ($3)->name;
@@ -195,18 +194,19 @@ RegUnOpReg      : REG ASSIGN Op REG
                             exit(-1);
                         }
                     }
-                ;
-
-RegAssignReg    : REG ASSIGN REG
+                | REG ASSIGN REG
                     {
-                        if (Debug_Parser)   printf("Trace: RegAssignReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         code_list.push_back("mv " + ($1)->name + ", " + ($3)->name);
                     }
-                ;
-
-ArrayWrite      : REG LKHZ NUM RKHZ ASSIGN REG
+                | REG ASSIGN NUM
+                    {   
+                        if (Debug_Parser)   printf("Trace: Expression\n");
+                        code_list.push_back("li " + ($1)->name + ", " + to_string(($3)->val));
+                    }
+                | REG LKHZ NUM RKHZ ASSIGN REG
                     {
-                        if (Debug_Parser)   printf("Trace: ArrayWrite\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = ($3)->val;
 
                         if (num >= -2048 && num <= 2047){
@@ -218,11 +218,9 @@ ArrayWrite      : REG LKHZ NUM RKHZ ASSIGN REG
                         }
 
                     }
-                ;
-
-ArrayRead       : REG ASSIGN REG LKHZ NUM RKHZ
+                | REG ASSIGN REG LKHZ NUM RKHZ
                     {
-                        if (Debug_Parser)   printf("Trace: ArrayRead\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = ($5)->val;
                         if (num >= -2048 && num <= 2047){
                             code_list.push_back("lw " + ($1)->name + ", " + to_string(num) + "(" + ($3)->name + ")");
@@ -232,11 +230,9 @@ ArrayRead       : REG ASSIGN REG LKHZ NUM RKHZ
                             code_list.push_back("lw " + ($1)->name + ", 0(s0)");
                         }
                     }
-                ;
-
-IfStmt          : IF REG Op REG GOTO LABEL
+                | IF REG Op REG GOTO LABEL
                     {
-                        if (Debug_Parser)   printf("Trace: IfStmt\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string reg1 = ($2)->name;
                         string reg2 = ($4)->name;
                         string label = "." + ($6)->name;
@@ -258,36 +254,27 @@ IfStmt          : IF REG Op REG GOTO LABEL
                             exit(-1);
                         }
                     }
-                ;
-
-GotoLabel       : GOTO LABEL
+                | GOTO LABEL
                     {
-                        if (Debug_Parser)   printf("Trace: GotoLabel\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string label = "." + ($2)->name;
                         code_list.push_back("j " + label);
                     }
-                ;
-
-
-LabelDef        : LABEL COLON
+                | LABEL COLON
                     {
-                        if (Debug_Parser)   printf("Trace: LabelDef\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string label = "." + ($1)->name;
                         code_list.push_back(label + ":");
                     }
-                ;
-
-CallFunc        : CALL FNAME
+                | CALL FNAME
                     {
-                        if (Debug_Parser)   printf("Trace: CallFunc\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string func_name = (($2)->name).substr(2);
                         code_list.push_back("call " + func_name);
                     }
-                ;
-
-ReturnStmt      : RETURN
+                | RETURN
                     {
-                        if (Debug_Parser)   printf("Trace: ReturnStmt\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
 
                         if (stk >= -2048 && stk <= 2047){
                             code_list.push_back("\tlw\tra, " + to_string(stk-4) + "(sp)");
@@ -301,11 +288,9 @@ ReturnStmt      : RETURN
                         }
                         code_list.push_back("ret");
                     }
-                ;
-
-StoreRegInt     : STORE REG NUM
+                | STORE REG NUM
                     {
-                        if (Debug_Parser)   printf("Trace: StoreRegInt\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = 4 * ($3)->val;
 
                         if (num >= -2048 && num <= 2047){
@@ -317,11 +302,9 @@ StoreRegInt     : STORE REG NUM
                         }
 
                     }
-                ;
-
-LoadIntReg      : LOAD NUM REG
+                | LOAD NUM REG
                     {
-                        if (Debug_Parser)   printf("Trace: LoadIntReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = 4 * ($2)->val;
 
                         if (num >= -2048 && num <= 2047){
@@ -333,21 +316,17 @@ LoadIntReg      : LOAD NUM REG
                         }
 
                     }
-                ;
-
-LoadVarReg      : LOAD VAR REG
+                | LOAD VAR REG
                     {
-                        if (Debug_Parser)   printf("Trace: LoadVarReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         string var_name = ($2)->name;
                         string reg = ($3)->name;
                         code_list.push_back("lui " + reg + ", %hi(" + var_name + ")");
                         code_list.push_back("lw " + reg + ", %lo(" + var_name + ")(" + reg + ")");
                     }
-                ;
-
-LoadaddrIntReg  : LOADADDR NUM REG
+                | LOADADDR NUM REG
                     {
-                        if (Debug_Parser)   printf("Trace: LoadaddrIntReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         int num = 4 * ($2)->val;
                         string reg = ($3)->name;
                         if (num >= -2048 && num <= 2047){
@@ -357,11 +336,9 @@ LoadaddrIntReg  : LOADADDR NUM REG
                             code_list.push_back("add " + reg + ", sp, s0");
                         }
                     }
-                ;
-
-LoadaddrVarReg  : LOADADDR VAR REG
+                | LOADADDR VAR REG
                     {
-                        if (Debug_Parser)   printf("Trace: LoadaddrVarReg\n");
+                        if (Debug_Parser)   printf("Trace: Expression\n");
                         code_list.push_back("la " + ($3)->name + ", " + ($2)->name);
                     }
                 ;
