@@ -98,7 +98,7 @@ GlobalVarDecl   : VAR ASSIGN NUM
                     {
                         if (Debug_Parser)   printf("Trace: GlobalVarDecl\n");
                         string var_name = ($1)->name;
-                        int num = ($3)->val;
+                        int num = ($4)->val;
                         code_list.push_back("\t.comm\t" + var_name + ", " + to_string(num) + ", 4");
                     }
                 ;
