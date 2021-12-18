@@ -1,4 +1,4 @@
-#include"ast.hpp"
+#include"sysy_ast.hpp"
 
 vector<string>code_list;
 vector<int>label_list = {-1};

@@ -9,9 +9,9 @@
 
 using namespace std;
 
-#define Debug_Lex 0
-#define Debug_Parser 0
-#define Debug_Ir 0
+#define E2T_Debug_Lex 0
+#define E2T_Debug_Parser 0
+#define E2T_Debug_Ir 0
 
 extern vector<string>e2t_code_list;
 extern vector<string>init_list;

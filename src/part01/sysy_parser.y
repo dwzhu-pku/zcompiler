@@ -1,6 +1,6 @@
 %{
     #include<stdio.h>
-    #include"ast.hpp"
+    #include"sysy_ast.hpp"
     extern int yylex();
     extern int yylineno;
     extern FILE * yyin;

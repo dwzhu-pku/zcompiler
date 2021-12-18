@@ -3,9 +3,9 @@
 #include<iostream>
 #include<fstream>
 #include<algorithm>
-#include"ast.hpp"
-#include"sym.hpp"
-#include"parser.tab.hpp"
+#include"sysy_ast.hpp"
+#include"sysy_sym.hpp"
+#include"sysy_parser.tab.hpp"
 extern FILE * yyin;
 extern FILE * yyout;
 

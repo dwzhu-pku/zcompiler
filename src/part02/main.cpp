@@ -5,8 +5,8 @@
 #include<algorithm>
 #include"eeyore_ast.hpp"
 #include"eeyore_parser.tab.hpp"
-extern FILE * yyin;
-extern FILE * yyout;
+extern FILE * e2t_yyin;
+extern FILE * e2t_yyout;
 
 int main(int argc, char **argv){
 
@@ -37,14 +37,14 @@ int main(int argc, char **argv){
         cout<<"Error, no output file!"<<endl;
         return 1;
     }
-    yyin = input;
-    yyout = output;
+    e2t_yyin = input;
+    e2t_yyout = output;
 
     streambuf* bak_cout = cout.rdbuf();
     ofstream new_cout(output_path);
     cout.rdbuf(new_cout.rdbuf());
 
-    yyparse();
+    e2t_yyparse();
 
     for(string line: e2t_code_list){
         if(line.size() >= 6 && line.compare(0,6,"f_main") == 0){

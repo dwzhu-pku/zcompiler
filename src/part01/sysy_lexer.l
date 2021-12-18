@@ -1,8 +1,8 @@
 %{
     #include<stdio.h>
     #include<stdlib.h>
-    #include"ast.hpp"
-    #include"parser.tab.hpp"
+    #include"sysy_ast.hpp"
+    #include"sysy_parser.tab.hpp"
 %}
 %option yylineno
 

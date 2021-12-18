@@ -1,7 +1,7 @@
 #include<stack>
 #include<map>
 #include<string>
-#include "sym.hpp"
+#include "sysy_sym.hpp"
 
 using namespace std;
 

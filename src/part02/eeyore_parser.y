@@ -1,14 +1,14 @@
 %{
     #include<stdio.h>
     #include"eeyore_ast.hpp"
-    extern int yylex();
-    extern int yylineno;
-    extern FILE * yyin;
-    extern FILE * yyout;
-    void yyerror(const char *);
+    extern int e2t_yylex();
+    extern int e2t_yylineno;
+    extern FILE * e2t_yyin;
+    extern FILE * e2t_yyout;
+    void e2t_yyerror(const char *);
     
 %}
-
+%define api.prefix {e2t_yy}
 %union{
     E2T_Token* kToken;
 };
@@ -27,19 +27,19 @@
 %%
 Program        : Declaration Program
                     {
-                        if (Debug_Parser)   printf("Trace: Program\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Program\n");
                     }
                 | Initialization  Program
                     {
-                        if (Debug_Parser)   printf("Trace: Program\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Program\n");
                     }
                 | FunctionDef  Program
                     {
-                        if (Debug_Parser)   printf("Trace: Program\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Program\n");
                     }
                 |
                     {
-                        if (Debug_Parser)   printf("Trace: Program\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Program\n");
                     }
                 ;
 
@@ -61,13 +61,13 @@ Declaration     : VAR SYMBOL
                             string ir_addr = "v" + to_string(e2t_get_next_var());
                             global_map[name] = ir_addr;
                             global_isarr[name] = 0;
-                            if(Debug_Parser)    printf("name %s, ir_addr %s\n", name.c_str(), ir_addr.c_str());
+                            if(E2T_Debug_Parser)    printf("name %s, ir_addr %s\n", name.c_str(), ir_addr.c_str());
                             e2t_code_list.push_back(ir_addr + " = 0");
                         }
                     }
                 | VAR NUM SYMBOL
                     {
-                        if (Debug_Parser)   printf("Trace: Declaration\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Declaration\n");
                         string name = ($3)->name;
                         if(in_func){
                             if (stack_map.find(name) != stack_map.end()) {
@@ -84,7 +84,7 @@ Declaration     : VAR SYMBOL
                             string ir_addr = "v" + to_string(e2t_get_next_var());
                             global_map[name] = ir_addr;
                             global_isarr[name] = 1;
-                            if(Debug_Parser)    printf("name %s, ir_addr %s\n", name.c_str(), ir_addr.c_str());
+                            if(E2T_Debug_Parser)    printf("name %s, ir_addr %s\n", name.c_str(), ir_addr.c_str());
                             e2t_code_list.push_back(ir_addr + " = malloc " + to_string(($2)->val));
                         }
                     }
@@ -92,7 +92,7 @@ Declaration     : VAR SYMBOL
 
 Initialization  : SYMBOL ASSIGN NUM
                     {
-                        if (Debug_Parser)   printf("Trace: Initialization\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Initialization\n");
                         string name = ($1)->name;
                         string reg = "t" + to_string(reg_idx++);
                         if(global_map.find(name) != global_map.end()){
@@ -107,7 +107,7 @@ Initialization  : SYMBOL ASSIGN NUM
                     }
                 | SYMBOL LKHZ NUM RKHZ ASSIGN NUM
                     {
-                        if (Debug_Parser)   printf("Trace: Initialization\n");
+                        if (E2T_Debug_Parser)   printf("Trace: Initialization\n");
                         string name = ($1)->name;
                         string reg = "t" + to_string(reg_idx++);
                         if(global_map.find(name) != global_map.end()){
@@ -365,10 +365,10 @@ RightValue      : SYMBOL
 
 %%
 
-void yyerror(const char *){
-    printf("Syntax error at line %d. \n", yylineno);
+void e2t_yyerror(const char *){
+    printf("Syntax error at line %d. \n", e2t_yylineno);
 };
 
-int yywrap(void){
+int e2t_yywrap(void){
     return 1;
 }

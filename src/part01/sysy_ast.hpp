@@ -6,7 +6,7 @@
 #include<vector>
 #include<stack>
 #include<map>
-#include"sym.hpp"
+#include"sysy_sym.hpp"
 
 using namespace std;
 
